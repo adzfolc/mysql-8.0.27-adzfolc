@@ -1,0 +1,1 @@
+# SQL EXECUTION - DML - delete
