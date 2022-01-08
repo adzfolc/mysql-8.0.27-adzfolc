@@ -5,7 +5,9 @@
 * This chapter may cotain comprehensive summary of MySQL/Innodb/MGR.
 * Review format
     1. My Code review would be written in source code in format of annonation.
-    2. I may note some optimizations begined with __adzfolc__.
+    2. Some key annonations would be begined with `__adzfolc__`.
+    3. Some questions,which makes me confused, would be denoted with `__adzfolc__ Q:`
+    4. Some optimizaton would be denoted with `__adzfolc__ To Do: refractor`.
 
 ## Keypoint
 1. Server

@@ -57,8 +57,10 @@ static void my_raw_free(void *ptr);
 extern void my_free(void *ptr);
 
 #ifdef USE_MALLOC_WRAPPER
+// my_memory_header 对内存分配的包装
 struct my_memory_header {
   PSI_memory_key m_key;
+  // 魔数
   uint m_magic;
   size_t m_size;
   PSI_thread *m_owner;
@@ -68,12 +70,15 @@ typedef struct my_memory_header my_memory_header;
 
 #define MAGIC 1234
 
+// 当开启 USE_MALLOC_WRAPPER 后,在给用户分配的内存上会进行二次包装.
+// 对于指针会额外包含 HEADER_SIZE 的空间
 #define USER_TO_HEADER(P) ((my_memory_header *)(((char *)P) - HEADER_SIZE))
 #define HEADER_TO_USER(P) (((char *)P) + HEADER_SIZE)
 
 void *my_malloc(PSI_memory_key key, size_t size, myf flags) {
   my_memory_header *mh;
   size_t raw_size;
+  // my_memory_header 长度必须大于 HEADER_SIZE,需要有保存魔数的空间
   static_assert(sizeof(my_memory_header) <= HEADER_SIZE,
                 "We must reserve enough memory to hold the header.");
 
@@ -81,9 +86,24 @@ void *my_malloc(PSI_memory_key key, size_t size, myf flags) {
   mh = (my_memory_header *)my_raw_malloc(raw_size, flags);
   if (likely(mh != nullptr)) {
     void *user_ptr;
+    // 初始化 my_memory_header 的魔数
     mh->m_magic = MAGIC;
+    // mh 的实际内存大小为 size
     mh->m_size = size;
+    // 宏定义       PSI_MEMORY_CALL(M) psi_memory_service->M
+    // 实际调用     psi_memory_service->memory_alloc(key, size, &mh->m_owner)
+    // @see         include/mysql/components/services/psi_memory_bits.h
+    // /**
+    //   Instrument memory allocation.
+    //   @param key the memory instrument key
+    //   @param size the size of memory allocated
+    //   @param[out] owner the memory owner
+    //   @return the effective memory instrument key
+    // */
+    // typedef PSI_memory_key (*memory_alloc_v1_t)(PSI_memory_key key, size_t size,
+    //                                             struct PSI_thread **owner)
     mh->m_key = PSI_MEMORY_CALL(memory_alloc)(key, size, &mh->m_owner);
+    // 扩展 mh 指针的长度,加上 HEADER_SIZE
     user_ptr = HEADER_TO_USER(mh);
     MEM_MALLOCLIKE_BLOCK(user_ptr, size, 0, (flags & MY_ZEROFILL));
     return user_ptr;
@@ -91,6 +111,15 @@ void *my_malloc(PSI_memory_key key, size_t size, myf flags) {
   return nullptr;
 }
 
+/**
+ * @brief 更改已经配置的内存空间,即更改由malloc()函数分配的内存空间的大小
+ * 
+ * @param key 
+ * @param ptr In&Out 需要扩展内存的指针
+ * @param size 目标分配大小
+ * @param flags 
+ * @return void* 
+ */
 void *my_realloc(PSI_memory_key key, void *ptr, size_t size, myf flags) {
   my_memory_header *old_mh;
   size_t old_size;
@@ -99,15 +128,19 @@ void *my_realloc(PSI_memory_key key, void *ptr, size_t size, myf flags) {
 
   if (ptr == nullptr) return my_malloc(key, size, flags);
 
+  // 去除 old_mh 指针中 HEADER_SIZE 长度
   old_mh = USER_TO_HEADER(ptr);
   assert((old_mh->m_key == key) || (old_mh->m_key == PSI_NOT_INSTRUMENTED));
   assert(old_mh->m_magic == MAGIC);
 
+  // old_size 代表 old_mh 的用户空间分配的长度
   old_size = old_mh->m_size;
 
   if (old_size == size) return ptr;
 
+  // 重新分配内存
   new_ptr = my_malloc(key, size, flags);
+  // 内存分配成功
   if (likely(new_ptr != nullptr)) {
 #ifndef NDEBUG
     my_memory_header *new_mh = USER_TO_HEADER(new_ptr);
@@ -119,10 +152,12 @@ void *my_realloc(PSI_memory_key key, void *ptr, size_t size, myf flags) {
 
     min_size = (old_size < size) ? old_size : size;
     memcpy(new_ptr, ptr, min_size);
+    // 释放旧的内存指针
     my_free(ptr);
 
     return new_ptr;
   }
+  // 内存分配失败
   return nullptr;
 }
 
@@ -137,6 +172,7 @@ void my_claim(const void *ptr, bool claim) {
       PSI_MEMORY_CALL(memory_claim)(mh->m_key, mh->m_size, &mh->m_owner, claim);
 }
 
+// 内存释放
 void my_free(void *ptr) {
   my_memory_header *mh;
 
@@ -145,6 +181,8 @@ void my_free(void *ptr) {
   mh = USER_TO_HEADER(ptr);
   assert(mh->m_magic == MAGIC);
   PSI_MEMORY_CALL(memory_free)(mh->m_key, mh->m_size, mh->m_owner);
+  // 通过魔数判断内存是否已经释放
+  __adzfolc__ Q:是否线程安全?
   /* Catch double free */
   mh->m_magic = 0xDEAD;
   MEM_FREELIKE_BLOCK(ptr, 0);
@@ -153,11 +191,15 @@ void my_free(void *ptr) {
 
 #else
 
+// 没有声明宏 USE_MALLOC_WRAPPER
+// 对 malloc/calloc/free 的封装
 void *my_malloc(PSI_memory_key key [[maybe_unused]], size_t size,
                 myf my_flags) {
   return my_raw_malloc(size, my_flags);
 }
 
+// 原生 realloc 函数
+// 对 malloc/calloc/free 的封装
 static void *my_raw_realloc(void *oldpoint, size_t size, myf my_flags);
 
 void *my_realloc(PSI_memory_key key [[maybe_unused]], void *ptr, size_t size,
@@ -169,6 +211,8 @@ void my_claim(const void *ptr [[maybe_unused]],
               bool claim [[maybe_unused]]) { /* Empty */
 }
 
+// 原生 free 函数
+// 对 free 的封装
 void my_free(void *ptr) { my_raw_free(ptr); }
 #endif
 
@@ -280,28 +324,42 @@ static void my_raw_free(void *ptr) {
 #endif
 }
 
+// 内存函数,类似 Unix C dup/dup2
 void *my_memdup(PSI_memory_key key, const void *from, size_t length,
                 myf my_flags) {
   void *ptr;
+  // 1.分配 length 长度内存,保存到 ptr
   if ((ptr = my_malloc(key, length, my_flags)) != nullptr)
+    // 2.通过 memcpy 将 [from, from+length) 的内存赋值给 ptr
     memcpy(ptr, from, length);
+  // 3.返回ptr
   return ptr;
 }
 
+// 字符串复制
 char *my_strdup(PSI_memory_key key, const char *from, myf my_flags) {
   char *ptr;
+  // 1.计算C风格字符串 from 的长度(C风格字符串有末尾'\0')
   size_t length = strlen(from) + 1;
+  // 2.分配 length 长度的字符串,保存到 ptr
   if ((ptr = (char *)my_malloc(key, length, my_flags)))
+    // 3.通过 memcpy 将 [from, from+length) 的内存赋值给 ptr
     memcpy(ptr, from, length);
+  // 4.返回ptr
   return ptr;
 }
 
+// 字符串指定长度复制
 char *my_strndup(PSI_memory_key key, const char *from, size_t length,
                  myf my_flags) {
   char *ptr;
+  // 1.分配 length 长度的字符串,保存到 ptr
   if ((ptr = (char *)my_malloc(key, length + 1, my_flags))) {
+    // 2.通过 memcpy 将 [from, from+length) 的内存赋值给 ptr
     memcpy(ptr, from, length);
+    // 3.最后一位置为0
     ptr[length] = 0;
   }
+  // 4.返回ptr
   return ptr;
 }
