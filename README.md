@@ -28,6 +28,9 @@
         1. Paxos Analysis
         2. Paxos and Mencius
         3. How Mencius is implemented in MGR
+5. Storage
+    1. B+ Tree
+    2. LSM Tree
 
 ## Transaction
 1. How ACID is implmented?
@@ -41,7 +44,7 @@
 1. Paxos
     1. Basic Paxos
     2. Multi Paxos
-        * Mencius
+        * Mencius and MGR
     3. Egalitarian Paxos
 2. Raft
     1. Raft
@@ -58,8 +61,18 @@
 * 02_sql  
 [00_sql_parser_and_optimizer.md](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)  
 [02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
+* 03_storage
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
+
+## Expandsion
+* Based on tourtial, I implement a storage engine called Casablanca.Source code path is storage/casablanca.
+* 基于教程,我实现了名为 Casablanca 的存储引擎.代码路径在 storage/casablanca.
+* Ability
+    * CRUD
+    * Index
+* To Do:
+    * 优化索引结构
 
 **This project is still under construction.**
 

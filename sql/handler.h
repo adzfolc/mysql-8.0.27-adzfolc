@@ -2418,6 +2418,7 @@ struct handlerton {
     area and need not be used by storage engine.
     see binlog_hton and binlog_savepoint_set/rollback for an example.
    */
+  // 为该存储引擎保留的回滚点大小
   uint savepoint_offset;
 
   /* handlerton methods */
@@ -2438,9 +2439,12 @@ struct handlerton {
   create_t create;
   drop_database_t drop_database;
   panic_t panic;
+  // 需要并发读取数据时,可用调用这个方法
   start_consistent_snapshot_t start_consistent_snapshot;
   flush_logs_t flush_logs;
+  // 返回存储引擎层的状态和基本信息
   show_status_t show_status;
+  // 返回分区状态
   partition_flags_t partition_flags;
   is_valid_tablespace_name_t is_valid_tablespace_name;
   get_tablespace_t get_tablespace;
@@ -2472,7 +2476,9 @@ struct handlerton {
     init.
   */
 
+  // 该方法回调二进制日志处理函数
   binlog_func_t binlog_func;
+  // 该方法用于查询二进制日志
   binlog_log_query_t binlog_log_query;
   acl_notify_t acl_notify;
   discover_t discover;
@@ -2809,6 +2815,7 @@ struct HA_CREATE_INFO {
                            stats estimation, if used, otherwise 0. */
   enum_stats_auto_recalc stats_auto_recalc{HA_STATS_AUTO_RECALC_DEFAULT};
   SQL_I_List<TABLE_LIST> merge_list;
+  // 标识该库使用了哪种存储引擎
   handlerton *db_type{nullptr};
   /**
     Row type of the table definition.
@@ -3593,10 +3600,13 @@ void get_sweep_read_cost(TABLE *table, ha_rows nrows, bool interrupted,
 
 class ha_statistics {
  public:
+  // 数据文件的长度
   ulonglong data_file_length;     /* Length off data file */
+  // 数据文件的最大长度限制
   ulonglong max_data_file_length; /* Length off data file */
   ulonglong index_file_length;
   ulonglong max_index_file_length;
+  // 空闲的字节
   ulonglong delete_length; /* Free bytes */
   ulonglong auto_increment_value;
   /*
@@ -3607,10 +3617,16 @@ class ha_statistics {
              else
                it is an estimate
   */
+  // 表中记录的数量
+  // 如果 table_flags() & HA_STATS_RECORDS_IS_EXACT 为真, 则 records 是准确值
+  // 否则,是近似值
   ha_rows records;
+  // 表中删除数据的数量
   ha_rows deleted;       /* Deleted records */
+  // 物理记录的长度
   ulong mean_rec_length; /* physical reclength */
   /* TODO: create_time should be retrieved from the new DD. Remove this. */
+  // 表的创建时间
   time_t create_time; /* When table was created */
   ulong check_time;
   ulong update_time;
@@ -4142,10 +4158,13 @@ class handler {
   ha_rows estimation_rows_to_insert;
 
  public:
+  // 该 handler 使用的存储引擎
   handlerton *ht; /* storage engine of this handler */
   /** Pointer to current row */
+  // 指向当前行的指针
   uchar *ref;
   /** Pointer to duplicate row */
+  // 指向 dup 行的指针
   uchar *dup_ref;
 
   ha_statistics stats;

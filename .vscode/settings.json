@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.ipp": "cpp",
+        "*.ic": "cpp",
+        "exception": "cpp",
+        "new": "cpp",
+        "streambuf": "cpp",
+        "*.inc": "cpp"
+    }
+}
