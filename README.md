@@ -62,3 +62,8 @@
 [99_QA](./notes_by_adzfolc/99_QA.md)
 
 **This project is still under construction.**
+
+## To Do List
+1. MySQL核心内幕
+    1. Chp 7 查询解析与优化器
+    2. Chp 8 安全管理系统
