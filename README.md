@@ -61,7 +61,9 @@
 * 02_sql  
 [00_sql_parser_and_optimizer](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)  
 [02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
-* 03_storage
+* 03_storage  
+[00_storage_layer_intro](./notes_by_adzfolc/03_Storage/00_storage_layer_intro.md)  
+[01_mysql_meta_data](./notes_by_adzfolc/03_Storage/01_mysql_meta_data.md)
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
 
@@ -80,3 +82,15 @@
 1. MySQL核心内幕
     1. Chp 7 查询解析与优化器
     2. Chp 8 安全管理系统
+    3. P230
+2. MySQL运维内参
+3. MySQL技术内幕-InnoDB存储引擎
+4. MySQL内核-INNODB存储引擎 
+5. 高性能MySQL
+6. Introducing InnoDB Cluster Learning the MySQL High Availability Stack by Charles Bell
+7. Expert MySQL
+8. 深入理解MySQL核心技术/Understanding MySQL Internals Discovering and Improving a Great Database
+9. MySQL是怎样运行的
+10. MySQL Concurrency Locking and Transactions for MySQL Developers and DBAs
+11. MySQL Group Replication_ The Magic Explained v1/v2
+12. 数据库查询优化器的艺术 原理解析与SQL性能优化 (SQL 可看可不看...)
