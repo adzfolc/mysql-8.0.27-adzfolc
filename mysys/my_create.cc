@@ -64,6 +64,7 @@ File my_create(const char *FileName, int CreateFlags, int AccessFlags,
                myf MyFlags) {
   DBUG_TRACE;
 
+  // 声明文件描述符 fd
   File fd = -1;
 #if defined(_WIN32)
   fd = my_win_open(FileName, AccessFlags | O_CREAT);

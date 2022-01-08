@@ -569,7 +569,7 @@ extern void my_once_free(void);
 extern char *my_once_strdup(const char *src, myf myflags);
 extern void *my_once_memdup(const void *src, size_t len, myf myflags);
 extern File my_open(const char *filename, int Flags, myf MyFlags);
-
+// 创建一个新文件
 extern File my_create(const char *FileName, int CreateFlags, int AccessFlags,
                       myf MyFlags);
 extern int my_close(File fd, myf MyFlags);
