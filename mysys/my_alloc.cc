@@ -245,6 +245,19 @@ void *multi_alloc_root(MEM_ROOT *root, ...) {
   size_t tot_length, length;
   DBUG_TRACE;
 
+  /**
+   * @brief Construct a new va start object
+   * root               Memory root
+   * 1.从入参中对每个元素逐个调用 va_arg 遍历
+   * 2.计算元素字节对齐后的总字节长度
+   * 3.通过 MEM_ROOT root 分配长度 tot_length 的内存空间
+   * 
+   * 可变个数参数 stdarg.h
+   * va_start           获取可变参数列表的第一个参数地址
+   * va_arg             获取可变参数的当前参数,返回指定类型并将指针指向下一地址
+   * va_end             清空 va_list 可变参数列表
+   * va_list            定义一个变量列表的指针类型
+   */
   va_start(args, root);
   tot_length = 0;
   while ((ptr = va_arg(args, char **))) {
