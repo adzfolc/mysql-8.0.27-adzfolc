@@ -6,7 +6,7 @@
 * Review format
     1. My Code review would be written in source code in format of annonation.
     2. Some key annonations would be begined with `__adzfolc__`.
-    3. Some questions,which makes me confused, would be denoted with `__adzfolc__ Q:`
+    3. Some questions,which make me confused, would be denoted with `__adzfolc__ Q:`
     4. Some optimizaton would be denoted with `__adzfolc__ To Do: refractor`.
 
 ## Keypoint
