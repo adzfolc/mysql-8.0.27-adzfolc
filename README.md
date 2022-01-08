@@ -56,7 +56,7 @@
 [01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)  
 [02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)
 * 02_sql  
-[00_sql_parser_and_optimizer.md](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)
+[00_sql_parser_and_optimizer.md](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)  
 [02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
