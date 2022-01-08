@@ -726,6 +726,7 @@ extern char *opt_disabled_storage_engines;
 
 extern sigset_t mysqld_signal_mask;
 /* query_id */
+// 查询 ID
 typedef int64 query_id_t;
 extern std::atomic<query_id_t> atomic_global_query_id;
 

@@ -117,11 +117,13 @@ class Srv_session {
   /**
     Returns the number opened sessions in thread initialized by this class.
   */
+ // 当前线程初始化的 sessions 数
   static unsigned int session_count();
 
   /**
     Returns the number currently running threads initialized by this class.
   */
+  // 当前 Server session 运行的线程数
   static unsigned int thread_count(const void *plugin_name);
 
   /**

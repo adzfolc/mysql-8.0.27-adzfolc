@@ -50,6 +50,7 @@ struct Connection_handler_functions;
 
 // Initialize static members
 uint Connection_handler_manager::connection_count = 0;
+// 最大可用连接数
 ulong Connection_handler_manager::max_used_connections = 0;
 ulong Connection_handler_manager::max_used_connections_time = 0;
 THD_event_functions *Connection_handler_manager::event_functions = nullptr;
