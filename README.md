@@ -53,7 +53,7 @@
 [00_summary](./notes_by_adzfolc/00_summary.md)
 * 01_Server  
 [00_server_mmary](./notes_by_adzfolc/01_Server/00_server_summary.md)  
-[01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)
+[01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)  
 [02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)
 * 02_sql  
 [00_sql_parser_and_optimizer.md](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)
