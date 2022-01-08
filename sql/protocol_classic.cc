@@ -848,15 +848,16 @@ bool net_send_error(NET *net, uint sql_errno, const char *err) {
 
 /**
   Return OK to the client.
+  给客户端响应 OK 报文
 
   See @ref page_protocol_basic_ok_packet for the OK packet structure.
 
-  @param thd                     Thread handler
+  @param thd                     Thread handler                               线程描述类
   @param server_status           The server status
   @param statement_warn_count    Total number of warnings
-  @param affected_rows           Number of rows changed by statement
-  @param id                      Auto_increment id for first row (if used)
-  @param message                 Message to send to the client
+  @param affected_rows           Number of rows changed by statement          被影响的行数(DML)
+  @param id                      Auto_increment id for first row (if used)    插入ID
+  @param message                 Message to send to the client                消息
                                  (Used by mysql_status)
   @param eof_identifier          when true [FE] will be set in OK header
                                  else [00] will be used
@@ -865,7 +866,6 @@ bool net_send_error(NET *net, uint sql_errno, const char *err) {
   @retval true An error occurred and the messages wasn't sent properly
 */
 
-// 发送 OK 报文
 static bool net_send_ok(THD *thd, uint server_status, uint statement_warn_count,
                         ulonglong affected_rows, ulonglong id,
                         const char *message, bool eof_identifier) {
@@ -884,6 +884,8 @@ static bool net_send_ok(THD *thd, uint server_status, uint statement_warn_count,
   bool error = false;
   DBUG_TRACE;
 
+  // vio 是 MySQL 协议中 Client/Sever 两侧都有的一个类,用来存放交互的一些信息
+  // struct MYSQL_VIO == struct VIO *
   if (!net->vio)  // hack for re-parsing queries
   {
     DBUG_PRINT("info", ("vio present: NO"));
@@ -1041,6 +1043,7 @@ static uchar eof_buff[1] = {(uchar)254}; /* Marker for end of fields */
 
 /**
   Send eof (= end of result set) to the client.
+  给客户端发送 eof 报文
 
   See @ref page_protocol_basic_eof_packet packet for the structure
   of the packet.
@@ -1209,6 +1212,7 @@ static bool net_send_error_packet(NET *net, uint sql_errno, const char *err,
                                   const CHARSET_INFO *character_set_results) {
   uint length;
   /*
+    buff[] 大小即为 error packet 大小
     buff[]: sql_errno:2 + ('#':1 + SQLSTATE_LENGTH:5) + MYSQL_ERRMSG_SIZE:512
   */
   uint error;
@@ -1226,10 +1230,12 @@ static bool net_send_error_packet(NET *net, uint sql_errno, const char *err,
     return false;
   }
 
+  // 在 error msg 前写入 errno, 错误号
   int2store(buff, sql_errno);
   pos = buff + 2;
   if (client_capabilities & CLIENT_PROTOCOL_41) {
     /* The first # is to make the protocol backward compatible */
+    // SQL 状态标识符 '#' 代表协议向后兼容
     buff[2] = '#';
     pos = my_stpcpy(buff + 3, sqlstate);
   }

@@ -262,7 +262,7 @@ void STDCALL mysql_debug(const char *debug [[maybe_unused]]) {
 /**************************************************************************
   Change user and database
 **************************************************************************/
-
+// reply COM_CHANGE_USER packet
 bool STDCALL mysql_change_user(MYSQL *mysql, const char *user,
                                const char *passwd, const char *db) {
   int rc;

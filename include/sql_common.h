@@ -193,6 +193,7 @@ struct MYSQL_METHODS {
                            const unsigned char *header, size_t header_length,
                            const unsigned char *arg, size_t arg_length,
                            bool skip_check, MYSQL_STMT *stmt);
+  // Client 通过 read_rows 方法解析 row packet
   MYSQL_DATA *(*read_rows)(MYSQL *mysql, MYSQL_FIELD *mysql_fields,
                            unsigned int fields);
   MYSQL_RES *(*use_result)(MYSQL *mysql);
