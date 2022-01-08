@@ -133,6 +133,7 @@ class Connection_handler_manager {
 
   /**
     Singleton method to return an instance of this class.
+    static -- 单例模式
   */
   static Connection_handler_manager *get_instance() {
     assert(m_instance != nullptr);

@@ -892,6 +892,7 @@ void Mysqld_socket_listener::setup_connection_events(
 
 /**
   Accept a new connection on a ready listening socket.
+  从就绪的 socket 创建新的连接
 
   @param listen_sock  Listening socket ready to accept a new connection
   @param [out] connect_sock  Socket corresponding to a new accepted connection
@@ -1337,6 +1338,8 @@ const Listen_socket *Mysqld_socket_listener::get_listen_socket() const {
   ;
 }
 
+// IO 多路复用 (poll or select 监听端口)
+// __adzfolc__ To Do: refractor socket_connection.cc to use epoll ET
 Channel_info *Mysqld_socket_listener::listen_for_connection_event() {
 #ifdef HAVE_POLL
   int retval = poll(&m_poll_info.m_fds[0], m_socket_vector.size(), -1);

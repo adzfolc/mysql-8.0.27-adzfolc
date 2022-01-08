@@ -1169,6 +1169,8 @@ bool using_udf_functions;
 bool locked_in_memory;
 bool opt_using_transactions;
 ulong opt_tc_log_size;
+// std::atomic 原子变量
+// 代表 MySQL 前端 event_loop 是否停止
 std::atomic<int32> connection_events_loop_aborted_flag;
 static std::atomic<enum_server_operational_state> server_operational_state{
     SERVER_BOOTING};
@@ -3118,6 +3120,7 @@ static bool network_init(void) {
       */
       if (mysqld_admin_port == 0) mysqld_admin_port = MYSQL_ADMIN_PORT;
     }
+    // 初始化 listener
     Mysqld_socket_listener *mysqld_socket_listener = new (std::nothrow)
         Mysqld_socket_listener(bind_addresses_info, mysqld_port,
                                admin_address_info, mysqld_admin_port,
@@ -3127,6 +3130,7 @@ static bool network_init(void) {
                                back_log, mysqld_port_timeout, unix_sock_name);
     if (mysqld_socket_listener == nullptr) return true;
 
+    // 初始化 acceptor
     mysqld_socket_acceptor = new (std::nothrow)
         Connection_acceptor<Mysqld_socket_listener>(mysqld_socket_listener);
     if (mysqld_socket_acceptor == nullptr) {

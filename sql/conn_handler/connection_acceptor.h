@@ -38,6 +38,10 @@
   callback functor object would on receiving connection event
   from the client to process the connection.
 */
+/**
+ * MySQL 前端线程模型采用 Reactor 模型,初步看下来是 多Reactor 模型.
+ * 采用 Main Reactor + Sub Reactor, 以及
+ */
 template <typename Listener>
 class Connection_acceptor {
   Listener *m_listener;

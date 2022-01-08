@@ -740,11 +740,13 @@ char ***get_remaining_argv();
 #define ER(X) please_use_ER_THD_or_ER_DEFAULT_instead(X)
 
 /* Accessor function for _connection_events_loop_aborted flag */
+// connection_events_loop_aborted_flag 原子变量 -- 读
 [[nodiscard]] inline bool connection_events_loop_aborted() {
   return connection_events_loop_aborted_flag.load();
 }
 
 /* only here because of unireg_init(). */
+// connection_events_loop_aborted_flag 原子变量 -- 写
 static inline void set_connection_events_loop_aborted(bool value) {
   connection_events_loop_aborted_flag.store(value);
 }
