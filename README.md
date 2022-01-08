@@ -63,7 +63,9 @@
 [02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
 * 03_storage  
 [00_storage_layer_intro](./notes_by_adzfolc/03_Storage/00_storage_layer_intro.md)  
-[01_mysql_meta_data](./notes_by_adzfolc/03_Storage/01_mysql_meta_data.md)
+[01_mysql_meta_data](./notes_by_adzfolc/03_Storage/01_mysql_meta_data.md)  
+    * InnoDB  
+    [01_buffer](./notes_by_adzfolc/03_Storage/01_InnoDB/01_buffer.md)
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
 
