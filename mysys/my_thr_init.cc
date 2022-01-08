@@ -69,12 +69,17 @@ static thread_local int THR_winerrno = 0;
 #endif
 
 mysql_mutex_t THR_LOCK_myisam_mmap;
+// 线程锁 保护与 MyISAM 存储引擎有关的结构和变量
 mysql_mutex_t THR_LOCK_myisam;
+// 线程锁 保护与 Memory 存储引擎有关的结构和变量
 mysql_mutex_t THR_LOCK_heap;
 mysql_mutex_t THR_LOCK_malloc;
+// 线程锁 保护与文件打开有关的结构和变量
 mysql_mutex_t THR_LOCK_open;
+// 线程锁 保护与表锁管理有关的结构和变量
 mysql_mutex_t THR_LOCK_lock;
 mysql_mutex_t THR_LOCK_net;
+// 线程锁 保护与字符集有关的结构和变量
 mysql_mutex_t THR_LOCK_charset;
 #ifndef NDEBUG
 mysql_mutex_t THR_LOCK_threads;

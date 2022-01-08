@@ -208,11 +208,15 @@ class Repair_mrg_table_error_handler : public Internal_error_handler {
 
 /**
   LOCK_open protects the following variables/objects:
+  MySQL 全局互斥锁 -- table lock
 
   1) The table_def_cache
      This is the hash table mapping table name to a table
      share object. The hash table can only be manipulated
      while holding LOCK_open.
+     table_def_cache
+     @see Table_definition_cache
+          map of table name to a table share object
   2) last_table_id
      Generation of a new unique table_map_id for a table
      share is done through incrementing last_table_id, a

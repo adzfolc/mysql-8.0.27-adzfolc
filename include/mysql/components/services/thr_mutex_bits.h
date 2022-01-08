@@ -55,10 +55,13 @@ typedef pthread_mutex_t native_mutex_t;
 typedef pthread_mutexattr_t native_mutexattr_t;
 #endif
 
+// 对锁获取进行检查,便于调试
 struct safe_mutex_t;
 
+// MySQL 锁封装
 struct my_mutex_t {
   union u {
+    // 使用操作系统提供的原生 mutex 锁,记为 native_mutex_t
     native_mutex_t m_native;
     safe_mutex_t *m_safe_ptr;
   } m_u;

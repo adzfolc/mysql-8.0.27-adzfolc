@@ -684,7 +684,9 @@ extern MYSQL_PLUGIN_IMPORT char pidfile_name[];
  */
 extern mysql_mutex_t LOCK_status;
 extern mysql_mutex_t LOCK_uuid_generator;
+// 全局锁 保护对 Unix C 库函数的调用
 extern mysql_mutex_t LOCK_crypt;
+// 全局锁 表管理线程的数据结构需要锁保护
 extern mysql_mutex_t LOCK_manager;
 extern mysql_mutex_t LOCK_global_system_variables;
 extern mysql_mutex_t LOCK_user_conn;
