@@ -52,6 +52,7 @@
 * 01_Server  
 [00_server_mmary](./notes_by_adzfolc/01_Server/00_server_summary.md)  
 [01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)
+[02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)
 * 02_sql  
 [02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
 * 99_QA  
