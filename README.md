@@ -12,3 +12,9 @@
     2. SQL Optimizer
 
 ## Notes
+* 00_Summary  
+[summary](./notes_by_adzfolc/00_summary.md)
+* 01_sql  
+[01_sql_execution_dml_delete](./notes_by_adzfolc/01_sql_execution_dml_delete.md)
+* 99_QA  
+[99_QA](./notes_by_adzfolc/99_QA.md)
