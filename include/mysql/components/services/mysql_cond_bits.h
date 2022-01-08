@@ -38,6 +38,10 @@
 
 /**
   An instrumented cond structure.
+  MySQL 线程同步(对 Unix C 线程同步封装)
+  @see pthread_cond_wait()
+  @see pthread_cond_signal()
+  @see pthread_cond_broadcast()
   @c mysql_cond_t is a drop-in replacement for @c native_cond_t.
   @sa mysql_cond_init
   @sa mysql_cond_wait

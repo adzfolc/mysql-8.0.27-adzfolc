@@ -58,7 +58,9 @@ class Per_thread_connection_handler : public Connection_handler {
   */
   static std::list<Channel_info *> *waiting_channel_info_list;
 
+  // MySQL 锁封装(wrap Unix pthread_mutex_t)
   static mysql_mutex_t LOCK_thread_cache;
+  // 与 LOCK_thread_count 结合使用,当线程被创建或者销毁时设置
   static mysql_cond_t COND_thread_cache;
   static mysql_cond_t COND_flush_thread_cache;
 
