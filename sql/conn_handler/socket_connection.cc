@@ -1369,6 +1369,7 @@ Channel_info *Mysqld_socket_listener::listen_for_connection_event() {
     must exist. Check that get_ready_socket() returns a valid socket.
   */
   assert(listen_socket != nullptr);
+  // 栈上创建变量 MYSQL_SOCKET, 用于稍后作为入参用于建立连接
   MYSQL_SOCKET connect_sock;
 #ifdef HAVE_SETNS
   /*
