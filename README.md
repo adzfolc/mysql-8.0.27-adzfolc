@@ -1,5 +1,12 @@
 # MySQL 8.0.27 Review by adzfolc
 
+## Notifications
+* In this doc, will make the rules of my code review and period summary for later review.
+* This chapter may cotain comprehensive summary of MySQL/Innodb/MGR.
+* Review format
+    1. My Code review would be written in source code in format of annonation.
+    2. I may note some optimizations begined with __adzfolc__.
+
 ## Keypoint
 1. Server
     1. Thread model
@@ -22,7 +29,7 @@
 
 ## Transaction
 1. How ACID is implmented?
-2. Timestacp and GTID
+2. Timestamp and GTID
 3. Locks
 4. Logs
     1. Undolog
