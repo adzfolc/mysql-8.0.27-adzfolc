@@ -154,6 +154,7 @@ class sp_cache;
 struct Binlog_user_var_event;
 struct LOG_INFO;
 
+// 用户连接限制, MySQL 可以设置某个用户能发起的连接数量和单位时间内的查询次数
 typedef struct user_conn USER_CONN;
 struct MYSQL_LOCK;
 
@@ -487,12 +488,16 @@ class Open_tables_state {
     List of regular tables in use by this thread. Contains persistent base
     tables that were opened with @see open_tables().
   */
+  // 线程所使用表的链表,表为常规表,即 select/update 等高等级查询语句中使用的表.
+  // 至于 HANDLER 查询(handler_tables) 和 子查询衍生表(derived_tables) 不属于常规表.
   TABLE *open_tables;
   /**
     List of temporary tables used by this thread. Contains user-level
     temporary tables, created with CREATE TEMPORARY TABLE, and
     intermediate tables used in ALTER TABLE implementation.
   */
+  // 线程使用的临时表的链表,临时表的存在时间处于会话期内.
+  // 由 CREATE TEMPORARY TABLE 和 立刻表在 ALTER TABLE 的实现中 创建.
   TABLE *temporary_tables;
   /*
     During a MySQL session, one can lock tables in two modes: automatic
@@ -508,6 +513,9 @@ class Open_tables_state {
     the 'LOCK_TABLES' chapter of the MySQL manual.
     See also lock_tables() for details.
   */
+  // 存储 MySQL session 中所有的锁信息
+  // 1.自动获取的锁信息,执行 SQL 前自动获取的锁信息
+  // 2.显式获取的锁信息,例如通过 LOCK TABLES 的 SQL
   MYSQL_LOCK *lock;
 
   /*
@@ -876,6 +884,7 @@ class THD : public MDL_context_owner,
   std::unique_ptr<LEX> main_lex;
 
  public:
+  // 指向当前查询的查询解析树的指针(词法解析)
   LEX *lex;                                        // parse tree descriptor
   dd::cache::Dictionary_client *dd_client() const  // Get the dictionary client.
   {
@@ -1003,6 +1012,7 @@ class THD : public MDL_context_owner,
   collation_unordered_map<std::string, unique_ptr_with_deleter<user_var_entry>>
       user_vars{system_charset_info, key_memory_user_var_entry};
   struct rand_struct rand;                      // used for authentication
+  // 当前 session 中可变的系统变量,会话期间可变化.
   struct System_variables variables;            // Changeable local variables
   struct System_status_var status_var;          // Per thread statistic vars
   struct System_status_var *initial_status_var; /* used by show status */
@@ -1286,6 +1296,7 @@ class THD : public MDL_context_owner,
     Therefore, it may point only to constant (statically
     allocated) strings, which memory won't go away over time.
   */
+  // show processlist; 看到的线程状态信息
   const char *m_proc_info;
   /**
     Return the m_proc_info, possibly using the string of an older
@@ -1383,6 +1394,7 @@ class THD : public MDL_context_owner,
   bool is_admin_connection() const { return m_is_admin_conn; }
 
   uint32 unmasked_server_id;
+  // 所有参与复制功能的 MySQL 服务器都被赋予了一个 id 号,当主服务器更新操作时,它记录原始数据库 ID 到 binlog 中去
   uint32 server_id;
   uint32 file_id;  // for LOAD DATA INFILE
   /* remote (peer) port */
@@ -1673,6 +1685,7 @@ class THD : public MDL_context_owner,
   /**@}*/
   // NOTE: Ideally those two should be in Protocol,
   // but currently its design doesn't allow that.
+  // 客户端连接描述符
   NET net;        // client connection descriptor
   String packet;  // dynamic buffer for network I/O
  public:
@@ -2180,6 +2193,7 @@ class THD : public MDL_context_owner,
   void set_status_no_index_used();
   void set_status_no_good_index_used();
 
+  // 当前数据库的字符集
   const CHARSET_INFO *db_charset;
 #if defined(ENABLED_PROFILING)
   std::unique_ptr<PROFILING> profiling;
@@ -2225,11 +2239,13 @@ class THD : public MDL_context_owner,
     from table are necessary for this select, to check if it's necessary to
     update auto-updatable fields (like auto_increment and timestamp).
   */
+  // 线程安全 查询id 递增
   query_id_t query_id;
 
   /* Statement id is thread-wide. This counter is used to generate ids */
   ulong statement_id_counter;
   ulong rand_saved_seed1, rand_saved_seed2;
+  // MySQL Server 分配给当前线程的 id, 通过 show processlist; 看到的就是这个值
   my_thread_t real_id; /* For debugging */
                        /**
                          This counter is 32 bit because of the client protocol.
@@ -2253,6 +2269,8 @@ class THD : public MDL_context_owner,
   my_thread_id thread_id() const { return m_thread_id; }
   uint tmp_table;
   uint server_status, open_options;
+  // enum_thread_type 枚举值,标识当前线程的类型
+  // 线程不是由客户端请求引起时,设置这个值
   enum enum_thread_type system_thread;
 
   // Check if this THD belongs to a system thread.
@@ -2437,6 +2455,7 @@ class THD : public MDL_context_owner,
     KILL_TIMEOUT = ER_QUERY_TIMEOUT,
     KILLED_NO_VALUE /* means neither of the states */
   };
+  // 标识当前 THD 线程是否终止,如果终止则线程立刻执行清理工作并退出线程
   std::atomic<killed_state> killed;
 
   /**
@@ -2460,6 +2479,7 @@ class THD : public MDL_context_owner,
 
   /// @todo: slave_thread is completely redundant, we should use 'system_thread'
   /// instead /sven
+  // 标识当前线程是否是从服务器线程,若是则为 true
   bool slave_thread;
 
   uchar password;

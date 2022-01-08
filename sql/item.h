@@ -3242,6 +3242,7 @@ class Item : public Parse_tree_node {
 
  protected:
   /// str_values's main purpose is to cache the value in save_in_field
+  // 该变量的主要作用是将变量缓存到 save_in_field 中
   String str_value;
 
  public:
@@ -3251,6 +3252,7 @@ class Item : public Parse_tree_node {
   */
   DTCollation collation;
   Item_name_string item_name;  ///< Name from query
+  // SQL 中的原始名
   Item_name_string orig_name;  ///< Original item name (if it was renamed)
   /**
     Maximum length of result of evaluating this item, in number of bytes.
@@ -3267,6 +3269,7 @@ class Item : public Parse_tree_node {
     - For geometry, the maximum size of a BLOB (it's underlying storage type).
     - For json, the maximum size of a BLOB (it's underlying storage type).
   */
+  // name 变量最大长度
   uint32 max_length;  ///< Maximum length, in bytes
   enum item_marker    ///< Values for member 'marker'
   { MARKER_NONE = 0,

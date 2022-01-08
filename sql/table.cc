@@ -1412,9 +1412,11 @@ static int open_binary_frm(THD *thd, TABLE_SHARE *share,
   uchar *disk_buff, *strpos, *null_flags, *null_pos;
   ulong pos, record_offset, *rec_per_key, rec_buff_length;
   rec_per_key_t *rec_per_key_float;
+  // 指针指向表在存储引擎中的位置
   handler *handler_file = nullptr;
   KEY *keyinfo;
   KEY_PART_INFO *key_part;
+  // 表中所有的列组成的数组
   Field **field_ptr;
   const char **interval_array;
   enum legacy_db_type legacy_db_type;

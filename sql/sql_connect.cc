@@ -436,7 +436,7 @@ bool thd_init_client_charset(THD *thd, uint cs_number) {
      0  success, thd is updated.
      1  error
 */
-
+// MySQL 协议握手建立 MySQL 连接
 static int check_connection(THD *thd) {
   uint connect_errors = 0;
   int auth_rc;

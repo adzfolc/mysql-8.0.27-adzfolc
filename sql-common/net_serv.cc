@@ -432,7 +432,7 @@ static bool net_should_retry(NET *net, uint *retry_count [[maybe_unused]]) {
 
   @note If compression is used, the original packet is modified!
 */
-
+// 将 MySQL net 包写到缓冲区去
 bool my_net_write(NET *net, const uchar *packet, size_t len) {
   uchar buff[NET_HEADER_SIZE];
 
@@ -453,6 +453,7 @@ bool my_net_write(NET *net, const uchar *packet, size_t len) {
     length. The last packet is always a packet that is < MAX_PACKET_LENGTH.
     (The last packet may even have a length of 0)
   */
+  // 比较大的 packets 在 MySQL Packet 中会被拆分,按照最大包长度 MAX_PACKET_LENGTH 进行分批发送
   while (len >= MAX_PACKET_LENGTH) {
     const ulong z_size = MAX_PACKET_LENGTH;
     int3store(buff, z_size);
@@ -461,6 +462,9 @@ bool my_net_write(NET *net, const uchar *packet, size_t len) {
         net_write_buff(net, packet, z_size)) {
       return true;
     }
+    // 分批写 packet 报文,按照写入数据到 buff
+    // packet 记录已经写掉的报文长度
+    // len    记录还没有写的报文长度
     packet += z_size;
     len -= z_size;
   }

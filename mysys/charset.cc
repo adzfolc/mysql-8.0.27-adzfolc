@@ -108,6 +108,12 @@ static void map_cs_name_to_number(const char *name, int num, int state) {
   if ((state & MY_CS_BINSORT)) (*cs_name_bin_num_map)[lower_case_name] = num;
 }
 
+/**
+ * @brief Get the collation number internal object
+ * 
+ * @param name 校对规则名称
+ * @return uint 校对规则 ID
+ */
 static uint get_collation_number_internal(const char *name) {
   char lower_case_name[MY_CS_BUFFER_SIZE] = {0};
   size_t len = std::min(strlen(name), sizeof(lower_case_name) - 2);
@@ -466,6 +472,12 @@ static const char *get_collation_name_alias(const char *name, char *buf,
   return nullptr;
 }
 
+/**
+ * @brief Get the collation number object
+ * 
+ * @param name 校对规则名称
+ * @return uint 校对规则 ID
+ */
 uint get_collation_number(const char *name) {
   uint id;
   char alias[64];
@@ -517,6 +529,13 @@ static const char *get_charset_name_alias(const char *name) {
   return nullptr;
 }
 
+/**
+ * @brief Get the charset number object
+ * 
+ * @param charset_name 字符集名称
+ * @param cs_flags 
+ * @return uint 校对规则 ID
+ */
 uint get_charset_number(const char *charset_name, uint cs_flags) {
   uint id;
   std::call_once(charsets_initialized, init_available_charsets);
@@ -526,6 +545,12 @@ uint get_charset_number(const char *charset_name, uint cs_flags) {
   return 0;
 }
 
+/**
+ * @brief Get the charset name object
+ * 
+ * @param charset_number 校对规则名称
+ * @return const char* 字符集名称
+ */
 const char *get_charset_name(uint charset_number) {
   std::call_once(charsets_initialized, init_available_charsets);
 
@@ -538,6 +563,14 @@ const char *get_charset_name(uint charset_number) {
   return "?"; /* this mimics find_type() */
 }
 
+/**
+ * @brief Get the internal charset object
+ * 
+ * @param loader_arg 校对规则名称
+ * @param cs_number 
+ * @param flags 
+ * @return CHARSET_INFO* 字符集类型
+ */
 static CHARSET_INFO *get_internal_charset(MY_CHARSET_LOADER *loader_arg,
                                           uint cs_number, myf flags) {
   char buf[FN_REFLEN];
@@ -580,6 +613,13 @@ static CHARSET_INFO *get_internal_charset(MY_CHARSET_LOADER *loader_arg,
   return cs;
 }
 
+/**
+ * @brief Get the charset object
+ * 
+ * @param cs_number 校对规则名称
+ * @param flags 
+ * @return CHARSET_INFO* 字符集类型
+ */
 CHARSET_INFO *get_charset(uint cs_number, myf flags) {
   CHARSET_INFO *cs;
   MY_CHARSET_LOADER loader;

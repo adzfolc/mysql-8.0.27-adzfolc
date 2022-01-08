@@ -118,14 +118,23 @@ extern char *mysql_unix_port;
 #define IS_LONGDATA(t) ((t) >= MYSQL_TYPE_TINY_BLOB && (t) <= MYSQL_TYPE_STRING)
 
 typedef struct MYSQL_FIELD {
+  // 列名
   char *name;               /* Name of column */
+  // 如果使用了 as, 这是原始列名
   char *org_name;           /* Original column name, if an alias */
+  // 表名称
   char *table;              /* Table of column if column was a field */
+  // 如果使用了 as, 这是原始表名称
   char *org_table;          /* Org table name, if table was an alias */
+  // 表所在的库
   char *db;                 /* Database for table */
+  // 表的 catalog 属性
   char *catalog;            /* Catalog for table */
+  // 默认值(default 值)
   char *def;                /* Default value (set by mysql_list_fields) */
+  // 列宽度(创建时指定)
   unsigned long length;     /* Width of column (create length) */
+  // 该类型列的最大宽度
   unsigned long max_length; /* Max width for selected set */
   unsigned int name_length;
   unsigned int org_name_length;
@@ -134,8 +143,11 @@ typedef struct MYSQL_FIELD {
   unsigned int db_length;
   unsigned int catalog_length;
   unsigned int def_length;
+  // div 标志
   unsigned int flags;         /* Div flags */
+  // 列中数据 decimal 类型的数量
   unsigned int decimals;      /* Number of decimals in field */
+  // 字符集
   unsigned int charsetnr;     /* Character set */
   enum enum_field_types type; /* Type of field. See mysql_com.h for types */
   void *extension;
@@ -309,6 +321,7 @@ typedef struct MYSQL {
   unsigned long packet_length;
   unsigned int port;
   unsigned long client_flag, server_capabilities;
+  // 握手初始化包的协议版本号
   unsigned int protocol_version;
   unsigned int field_count;
   unsigned int server_status;

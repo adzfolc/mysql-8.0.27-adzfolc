@@ -1427,6 +1427,7 @@ int my_block_write(IO_CACHE *info, const uchar *Buffer, size_t Count,
 #define UNLOCK_APPEND_BUFFER \
   if (need_append_buffer_lock) unlock_append_buffer(info);
 
+// 将数据从内核缓冲写到物理磁盘上
 int my_b_flush_io_cache(IO_CACHE *info, int need_append_buffer_lock) {
   size_t length;
   my_off_t pos_in_file;
@@ -1518,6 +1519,7 @@ int my_b_flush_io_cache(IO_CACHE *info, int need_append_buffer_lock) {
 
 int end_io_cache(IO_CACHE *info) {
   int error = 0;
+  // 回调函数
   IO_CACHE_CALLBACK pre_close;
   DBUG_TRACE;
   DBUG_PRINT("enter", ("cache: %p", info));

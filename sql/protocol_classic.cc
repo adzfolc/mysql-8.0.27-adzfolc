@@ -865,6 +865,7 @@ bool net_send_error(NET *net, uint sql_errno, const char *err) {
   @retval true An error occurred and the messages wasn't sent properly
 */
 
+// 发送 OK 报文
 static bool net_send_ok(THD *thd, uint server_status, uint statement_warn_count,
                         ulonglong affected_rows, ulonglong id,
                         const char *message, bool eof_identifier) {

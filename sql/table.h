@@ -781,6 +781,7 @@ struct TABLE_SHARE {
     indexes disabled by `ALTER TABLE ... DISABLE KEYS`, however it does
     include invisible indexes. The data dictionary populates this bitmap.
   */
+  // keys_in_use 对象,记录当前表中可以使用的所有索引,除了 ALTER TABLE ... DISABLE KEYS
   Key_map keys_in_use;
 
   /// The set of visible and enabled indexes for this table.
@@ -789,6 +790,7 @@ struct TABLE_SHARE {
   ha_rows min_rows{0}, max_rows{0}; /* create information */
   ulong avg_row_length{0};          /* create information */
   ulong mysql_version{0};           /* 0 if .frm is created before 5.0 */
+  // 记录长度,表示记录在优化器的长度,不是 MySQL 存储引擎内的长度.
   ulong reclength{0};               /* Recordlength */
   ulong stored_rec_length{0};       /* Stored record length
                                     (no generated-only generated fields) */
@@ -835,8 +837,11 @@ struct TABLE_SHARE {
                             */
   uint null_bytes{0}, last_null_bit_pos{0};
   uint fields{0};            /* Number of fields */
+  // 为操作一个记录而分配的临时缓冲区
   uint rec_buff_length{0};   /* Size of table->record[] buffer */
+  // 表内索引的数量
   uint keys{0};              /* Number of keys defined for the table*/
+  // 数据库中若某个列是索引的组成部分,则称为索引分量(key part)
   uint key_parts{0};         /* Number of key parts of all keys
                              defined for the table
                           */
@@ -850,7 +855,9 @@ struct TABLE_SHARE {
   */
   bool is_distinct{false};
 
+  // 可包含 Null 值的列数
   uint null_fields{0};    /* number of null fields */
+  // 可包含 blob 或 text 列的数量
   uint blob_fields{0};    /* number of blob fields */
   uint varchar_fields{0}; /* number of varchar fields */
   /**
@@ -904,6 +911,7 @@ struct TABLE_SHARE {
   uint db_options_in_use{0};
   uint rowid_field_offset{0}; /* Field_nr +1 to rowid field */
   /* Primary key index number, used in TABLE::key_info[] */
+  // 主键在索引数组里面的位置
   uint primary_key{0};
   uint next_number_index{0};      /* autoincrement key number */
   uint next_number_key_offset{0}; /* autoinc keypart offset in a key */
@@ -1429,6 +1437,7 @@ struct TABLE {
     a passed THD reference, or, if there is no such, current_thd.
     The reason for this is that we cannot guarantee the field is not NULL.
   */
+  // 使用该表的线程
   THD *in_use{nullptr};
   Field **field{nullptr}; /* Pointer to fields */
   /// Count of hidden fields, if internal temporary table; 0 otherwise.
@@ -1447,6 +1456,7 @@ struct TABLE {
     needed by the query without reading the row.
   */
   Key_map covering_keys;
+  // 局部优化使用的索引位图
   Key_map quick_keys;
 
   /* Merge keys are all keys that had a column reffered to in the query */
@@ -1475,6 +1485,7 @@ struct TABLE {
 
     The set is implemented as a bitmap.
   */
+  // 根据 FORCE KEY 和 IGNORE KEY 的索引视图
   Key_map keys_in_use_for_query;
   /* Map of keys that can be used to calculate GROUP BY without sorting */
   Key_map keys_in_use_for_group_by;
@@ -1581,6 +1592,7 @@ struct TABLE {
    the same statement. A non-zero query_id is used to control which tables
    in the list of pre-opened and locked tables are actually being used.
   */
+  // 当前使用该表的查询 id
   query_id_t query_id{0};
 
   /*
@@ -4358,6 +4370,7 @@ inline bool can_call_position(const TABLE *table) {
   in the code. open_binary_frm() uses these members while reading
   .frm files.
 */
+// .frm 文件,内容是 MySQL 表结构定义文件
 class FRM_context {
  public:
   FRM_context()

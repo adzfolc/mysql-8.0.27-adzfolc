@@ -46,6 +46,7 @@ struct MY_BITMAP {
 };
 
 extern void create_last_word_mask(MY_BITMAP *map);
+// 设置位图
 extern bool bitmap_init(MY_BITMAP *map, my_bitmap_map *buf, uint n_bits);
 extern bool bitmap_is_clear_all(const MY_BITMAP *map);
 extern bool bitmap_is_prefix(const MY_BITMAP *map, uint prefix_size);
@@ -58,6 +59,7 @@ extern uint bitmap_get_first(const MY_BITMAP *map);
 extern uint bitmap_get_first_set(const MY_BITMAP *map);
 extern uint bitmap_get_next_set(const MY_BITMAP *map, uint bitmap_bit);
 extern uint bitmap_bits_set(const MY_BITMAP *map);
+// 清除位图
 extern void bitmap_free(MY_BITMAP *map);
 extern void bitmap_set_above(MY_BITMAP *map, uint from_byte, bool use_bit);
 extern void bitmap_set_prefix(MY_BITMAP *map, uint prefix_size);
@@ -72,6 +74,7 @@ extern void bitmap_copy(MY_BITMAP *map, const MY_BITMAP *map2);
 #define no_bytes_in_map(map) (((map)->n_bits + 7) / 8)
 #define no_words_in_map(map) (((map)->n_bits + 31) / 32)
 
+// 设置位图某个具体的比特位
 static inline void bitmap_set_bit(MY_BITMAP *map, uint bit) {
   assert(bit < map->n_bits);
   ((uchar *)map->bitmap)[bit / 8] |= (1 << (bit & 7));
@@ -82,6 +85,7 @@ static inline void bitmap_flip_bit(MY_BITMAP *map, uint bit) {
   ((uchar *)map->bitmap)[bit / 8] ^= (1 << (bit & 7));
 }
 
+// 清除位图某个具体的比特位
 static inline void bitmap_clear_bit(MY_BITMAP *map, uint bit) {
   assert(bit < map->n_bits);
   ((uchar *)map->bitmap)[bit / 8] &= ~(1 << (bit & 7));
@@ -100,6 +104,7 @@ static inline bool bitmap_is_set(const MY_BITMAP *map, uint bit) {
    @retval true The bitmaps are equal.
    @retval false The bitmaps differ.
  */
+// 对位图进行比较操作
 static inline bool bitmap_cmp(const MY_BITMAP *map1, const MY_BITMAP *map2) {
   assert(map1->n_bits > 0);
   assert(map2->n_bits > 0);

@@ -651,6 +651,7 @@ class Field {
 
  protected:
   /// Holds the position to the field in record
+  // 数据记录的内存地址
   uchar *ptr;
 
  private:
@@ -698,13 +699,19 @@ class Field {
   const char *orig_db_name{nullptr};
   /// Pointer to original table name, only non-NULL for a temporary table
   const char *orig_table_name{nullptr};
+  // table_name 字段所属表
+  // field_name 字段名称
   const char **table_name, *field_name;
+  // 定义该字段时的注释
   LEX_CSTRING comment;
   /* Field is part of the following keys */
+  // 索引的第一个列
   Key_map key_start;          /* Keys that starts with this field */
+  // 若位图的第 n 位被指定为1,那么这个字段是第 n 个索引的一部分
   Key_map part_of_key;        ///< Keys that includes this field
                               ///< except of prefix keys.
   Key_map part_of_prefixkey;  ///< Prefix keys
+  // B-Tree 索引使用
   Key_map part_of_sortkey;    /* ^ but only keys usable for sorting */
   /**
     All keys that include this field, but not extended by the storage engine to
@@ -753,10 +760,12 @@ class Field {
 
   // Length of field. Never write to this member directly; instead, use
   // set_field_length().
+  // 该字段能够存储的最大长度
   uint32 field_length;
   virtual void set_field_length(uint32 length) { field_length = length; }
 
  private:
+  // 位图,记录字段定义时的其他选项(not null, auto increment, zero fill)
   uint32 flags{0};
   uint16 m_field_index;  // field number in fields array
 
@@ -1099,6 +1108,7 @@ class Field {
    */
   virtual uint32 max_data_length() const { return pack_length(); }
 
+  // 清除所有与 Field 关联的数据
   virtual type_conversion_status reset() {
     memset(ptr, 0, pack_length());
     return TYPE_OK;
@@ -1163,6 +1173,7 @@ class Field {
      function has no effect.
   */
   void evaluate_update_default_function();
+  // 判断是否是二进制
   virtual bool binary() const { return true; }
   virtual bool zero_pack() const { return true; }
   virtual enum ha_base_keytype key_type() const { return HA_KEYTYPE_BINARY; }
@@ -1377,6 +1388,7 @@ class Field {
    */
   virtual Field *clone(MEM_ROOT *mem_root) const = 0;
 
+  // 将字段数据的地址重新指向另外一个位置
   void move_field(uchar *ptr_arg, uchar *null_ptr_arg, uchar null_bit_arg) {
     ptr = ptr_arg;
     m_null_ptr = null_ptr_arg;
@@ -3912,6 +3924,7 @@ class Field_geom final : public Field_blob {
   type_conversion_status store(double nr) final;
   type_conversion_status store(longlong nr, bool unsigned_val) final;
   type_conversion_status store_decimal(const my_decimal *) final;
+  // 将 from 指针指向的内存部位和 field 类关联起来
   type_conversion_status store(const char *from, size_t length,
                                const CHARSET_INFO *cs) final;
 
@@ -3990,10 +4003,12 @@ class Field_json : public Field_blob {
   bool has_charset() const final { return false; }
   type_conversion_status store(const char *to, size_t length,
                                const CHARSET_INFO *charset) override;
+  // 将 double 类型的数字和 Field 类关联起来
   type_conversion_status store(double nr) override;
   type_conversion_status store(longlong nr, bool unsigned_val) override;
   type_conversion_status store_decimal(const my_decimal *) final;
   type_conversion_status store_json(const Json_wrapper *json);
+  //将 ltime 指向的时间数据和 Field 关联起来
   type_conversion_status store_time(MYSQL_TIME *ltime, uint8 dec_arg) final;
   type_conversion_status store(const Field_json *field);
 
@@ -4167,6 +4182,7 @@ class Field_typed_array final : public Field_json {
   Field_typed_array *clone(MEM_ROOT *mem_root) const override;
   bool is_unsigned() const final { return unsigned_flag; }
   bool is_array() const override { return true; }
+  // 返回该字段中存储的数据类型是什么
   Item_result result_type() const override;
   uint decimals() const override { return m_elt_decimals; }
   bool binary() const override {
@@ -4308,6 +4324,7 @@ class Field_enum : public Field_str {
   Field *new_field(MEM_ROOT *root, TABLE *new_table) const final;
   enum_field_types type() const final { return MYSQL_TYPE_STRING; }
   bool match_collation_to_optimize_range() const final { return false; }
+  // 根据表达式提供的数据类型判断本字段是否能转换
   enum Item_result cmp_type() const final { return INT_RESULT; }
   enum Item_result cast_to_int_type() const final { return INT_RESULT; }
   enum ha_base_keytype key_type() const final;
