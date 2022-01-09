@@ -74,7 +74,8 @@
     1. Chp 7 查询解析与优化器
     2. Chp 8 安全管理系统
     3. P230
-2. MySQL技术内幕-InnoDB存储引擎
+2. MySQL技术内幕-InnoDB存储引擎 P330
+3. MySQL 8.0 Reference Manual P3033
 
 ## Recommend Materials
 |Book|Comment|
