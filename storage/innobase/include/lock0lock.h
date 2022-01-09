@@ -857,8 +857,11 @@ void lock_trx_alloc_locks(trx_t *trx);
   0xFUL /*!< mask used to extract mode from the \
         type_mode field in a lock */
 /** Lock types */
+// 表锁
 #define LOCK_TABLE 16 /*!< table lock */
+// 行锁
 #define LOCK_REC 32   /*!< record lock */
+// 锁掩码,从 type_mode 中解析 lock type
 #define LOCK_TYPE_MASK                                \
   0xF0UL /*!< mask used to extract lock type from the \
          type_mode field in a lock */
@@ -866,12 +869,15 @@ void lock_trx_alloc_locks(trx_t *trx);
 #error "LOCK_MODE_MASK & LOCK_TYPE_MASK"
 #endif
 
+// 锁等待标识
 #define LOCK_WAIT                          \
   256 /*!< Waiting lock flag; when set, it \
       means that the lock has not yet been \
       granted, it is just waiting for its  \
       turn in the wait queue */
 /* Precise modes */
+// 普通锁标识
+// 标识 一个普通的 next-key lock LOCK_GAP 或者 LOCK_REC_NOT_GAP
 #define LOCK_ORDINARY                     \
   0 /*!< this flag denotes an ordinary    \
     next-key lock in contrast to LOCK_GAP \

@@ -1145,6 +1145,7 @@ constexpr const char *LOCK_TABLE_ID_FORMAT = UINT64PF ":" UINT64PF ":" UINT64PF;
  lock_id. Be sure to provide at least TRX_I_S_LOCK_ID_MAX_LEN + 1 if you
  want to be 100% sure that it will not abort.
  @return resulting lock id */
+// 创建 INNODB_LOCKS lock_id(锁ID)
 char *trx_i_s_create_lock_id(
     const i_s_locks_row_t *row, /*!< in: innodb_locks row */
     char *lock_id,              /*!< out: resulting lock_id */
@@ -1154,7 +1155,7 @@ char *trx_i_s_create_lock_id(
   int res_len;
 
   /* please adjust TRX_I_S_LOCK_ID_MAX_LEN if you change this */
-
+  // 通过 snprintf 将 LOCK_RECORD_ID_FORMAT(锁ID的格式,宏定义) + lock_trx_immutable_id(InnoDB中每个事务有一个唯一的 trx_id,read trx trx_id 是 0,第一次执行 DML 时 trx_id 变化,全局唯一) + lock_table_id(InnoDB table 标识符) + lock_immutable_id(lock 可能会升级,通过 lock_immutable_id 唯一标识一个锁)
   if (row->lock_space != SPACE_UNKNOWN) {
     /* record lock */
     res_len = snprintf(lock_id, lock_id_size, LOCK_RECORD_ID_FORMAT,

@@ -61,3 +61,5 @@
 10. Index Condition Pushdown(ICP) 优化
     * ICP 优化支持 range, ref, eq_ref, ref_or_null 类型查询
     * How? -> 取出索引的同时,判断是否可以进行 where 条件的过滤.部分 where 条件的过滤放到存储引擎层.
+
+11. 对于不包含主键/唯一索引的表, InnoDB 自动创建 隐藏列 GEN_CLUST_INDEX(包含 row ID 值).表中数据按照 rowID 排序.

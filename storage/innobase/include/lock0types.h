@@ -48,6 +48,7 @@ enum select_mode {
 };
 
 /* Basic lock modes */
+// 锁的模式
 enum lock_mode {
   LOCK_IS = 0,          /* intention shared */
   LOCK_IX,              /* intention exclusive */

@@ -359,6 +359,7 @@ Every time any column gets changed, added or removed, please remember
 to change i_s_innodb_plugin_version_postfix accordingly, so that
 the change can be propagated to server */
 static ST_FIELD_INFO innodb_trx_fields_info[] = {
+// InnoDB 存储引擎内部唯一的事务 ID
 #define IDX_TRX_ID 0
     {STRUCT_FLD(field_name, "trx_id"),
      STRUCT_FLD(field_length, MY_INT64_NUM_DECIMAL_DIGITS),
@@ -366,6 +367,7 @@ static ST_FIELD_INFO innodb_trx_fields_info[] = {
      STRUCT_FLD(field_flags, MY_I_S_UNSIGNED), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 当前事务的状态
 #define IDX_TRX_STATE 1
     {STRUCT_FLD(field_name, "trx_state"),
      STRUCT_FLD(field_length, TRX_QUE_STATE_STR_MAX_LEN + 1),
@@ -373,12 +375,16 @@ static ST_FIELD_INFO innodb_trx_fields_info[] = {
      STRUCT_FLD(field_flags, 0), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 事务的开始时间
 #define IDX_TRX_STARTED 2
     {STRUCT_FLD(field_name, "trx_started"), STRUCT_FLD(field_length, 0),
      STRUCT_FLD(field_type, MYSQL_TYPE_DATETIME), STRUCT_FLD(value, 0),
      STRUCT_FLD(field_flags, 0), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 等待事务的锁ID
+// trx_state==LOCK WAIT ==> trx_requested_lock_id 当前事务等待之前事务占用锁资源的ID
+// trx_state!=LOCK WAIT ==> trx_requested_lock_id is null
 #define IDX_TRX_REQUESTED_LOCK_ID 3
     {STRUCT_FLD(field_name, "trx_requested_lock_id"),
      STRUCT_FLD(field_length, TRX_I_S_LOCK_ID_MAX_LEN + 1),
@@ -386,12 +392,15 @@ static ST_FIELD_INFO innodb_trx_fields_info[] = {
      STRUCT_FLD(field_flags, MY_I_S_MAYBE_NULL), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 事务等待开始的时间
 #define IDX_TRX_WAIT_STARTED 4
     {STRUCT_FLD(field_name, "trx_wait_started"), STRUCT_FLD(field_length, 0),
      STRUCT_FLD(field_type, MYSQL_TYPE_DATETIME), STRUCT_FLD(value, 0),
      STRUCT_FLD(field_flags, MY_I_S_MAYBE_NULL), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 事务的权重,反映一个事务修改和锁住的行数
+// 发生死锁时, InnoDB 选择最小权重的事务回滚
 #define IDX_TRX_WEIGHT 5
     {STRUCT_FLD(field_name, "trx_weight"),
      STRUCT_FLD(field_length, MY_INT64_NUM_DECIMAL_DIGITS),
@@ -399,6 +408,7 @@ static ST_FIELD_INFO innodb_trx_fields_info[] = {
      STRUCT_FLD(field_flags, MY_I_S_UNSIGNED), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// MySQL 中的线程 ID, SHOW PROCESSLIST 显式的结果
 #define IDX_TRX_MYSQL_THREAD_ID 6
     {STRUCT_FLD(field_name, "trx_mysql_thread_id"),
      STRUCT_FLD(field_length, MY_INT64_NUM_DECIMAL_DIGITS),
@@ -406,6 +416,7 @@ static ST_FIELD_INFO innodb_trx_fields_info[] = {
      STRUCT_FLD(field_flags, MY_I_S_UNSIGNED), STRUCT_FLD(old_name, ""),
      STRUCT_FLD(open_method, 0)},
 
+// 事务运行的 SQL 语句
 #define IDX_TRX_QUERY 7
     {STRUCT_FLD(field_name, "trx_query"),
      STRUCT_FLD(field_length, TRX_I_S_TRX_QUERY_MAX_LEN),
