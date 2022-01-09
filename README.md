@@ -69,19 +69,28 @@
 
 * **Casablanca is still under construction.**
 
-## To Do List
+## Reading
 1. MySQL核心内幕
     1. Chp 7 查询解析与优化器
     2. Chp 8 安全管理系统
     3. P230
-2. MySQL运维内参
-3. MySQL技术内幕-InnoDB存储引擎
-4. MySQL内核-INNODB存储引擎 
-5. 高性能MySQL
-6. Introducing InnoDB Cluster Learning the MySQL High Availability Stack by Charles Bell
-7. Expert MySQL
-8. 深入理解MySQL核心技术/Understanding MySQL Internals Discovering and Improving a Great Database
-9. MySQL是怎样运行的
-10. MySQL Concurrency Locking and Transactions for MySQL Developers and DBAs
-11. MySQL Group Replication_ The Magic Explained v1/v2
-12. 数据库查询优化器的艺术 原理解析与SQL性能优化 (SQL 可看可不看...)
+2. MySQL技术内幕-InnoDB存储引擎
+
+## Recommend Materials
+|Book|Comment|
+|-|-|
+|MySQL 8.0 Reference Manual|MySQL详设..?|
+|PerconaServer-for-MySQL-8.0.23-14|Percona详设..?|
+|事务处理-概念与技术|好书,有讲 trx system 的设计,有很多设计的框架雏形|
+|MySQL核心内幕|正在入门,手撕引擎实现|
+|MySQL技术内幕-InnoDB存储引擎|重原理,需要自己结合参数看代码
+|MySQL运维内参|讲实现的,有 MGR|
+|MySQL内核-INNODB存储引擎|好书,代码古早版本,宏观能对上|
+|高性能MySQL|听说过没看过|
+|Introducing InnoDB Cluster Learning the MySQL High Availability Stack by Charles Bell|没听说过也没看过|
+|Expert MySQL|听说过没看过|
+|深入理解MySQL核心技术/Understanding MySQL Internals Discovering and Improving a Great Database|看过部分,古早版本的代码|
+|MySQL是怎样运行的|原理+口水书,写的不严肃.讲 Redo Undo Buffer 的模块很详细,结合代码看看|
+|MySQL Concurrency Locking and Transactions for MySQL Developers and DBAs|没听说过也没看过|
+|MySQL Group Replication_ The Magic Explained v1/v2|Oracle Slides,应该靠谱,没看|
+|数据库查询优化器的艺术 原理解析与SQL性能优化|SQL 可看可不看...|
