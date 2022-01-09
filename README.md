@@ -79,7 +79,8 @@
 ## Recommend Materials
 |Book|Comment|
 |-|-|
-|MySQL 8.0 Reference Manual|MySQL详设..?|
+|MySQL 8.0 Reference Manual|MySQL概设..?|
+|[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)|MySQL详设|
 |PerconaServer-for-MySQL-8.0.23-14|Percona详设..?|
 |[内核月报](https://github.com/tangwz/db-monthly)|应该没人不知道吧..?|
 |事务处理-概念与技术|好书,有讲 trx system 的设计,有很多设计的框架雏形|
