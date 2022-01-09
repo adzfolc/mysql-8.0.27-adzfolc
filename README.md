@@ -21,35 +21,20 @@
     3. Execution
 3. InnoDB
     1. Transaction
-    2. Log System
-    3. Storage
+        1. How ACID is implmented?
+        2. GTID
+        3. Locks
+        4. Logs
+            1. Undolog
+            2. Redolog
+    2. Binlog
 4. Replication
     1. MGR
-        1. Paxos Analysis
-        2. Paxos and Mencius
+        1. Basic Paxos and Mutli Paxos
+        2. Multi Paxos and Mencius
         3. How Mencius is implemented in MGR
 5. Storage
     1. B+ Tree
-    2. LSM Tree
-
-## Transaction
-1. How ACID is implmented?
-2. Timestamp and GTID
-3. Locks
-4. Logs
-    1. Undolog
-    2. Redolog
-
-## Consensus
-1. Paxos
-    1. Basic Paxos
-    2. Multi Paxos
-        * Mencius and MGR
-    3. Egalitarian Paxos
-2. Raft
-    1. Raft
-    2. Multi Raft
-    3. Parallel Raft
 
 ## Notes
 * 00_Summary  
@@ -57,15 +42,19 @@
 * 01_Server  
 [00_server_mmary](./notes_by_adzfolc/01_Server/00_server_summary.md)  
 [01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)  
-[02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)
+[02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)  
 * 02_sql  
-[00_sql_parser_and_optimizer](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)  
-[02_sql_execution_dml_delete](./notes_by_adzfolc/02_sql_execution_dml_delete.md)
+[00_sql_parser_and_optimizer](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)
 * 03_storage  
 [00_storage_layer_intro](./notes_by_adzfolc/03_Storage/00_storage_layer_intro.md)  
 [01_mysql_meta_data](./notes_by_adzfolc/03_Storage/01_mysql_meta_data.md)  
-    * InnoDB  
-    [01_buffer](./notes_by_adzfolc/03_Storage/01_InnoDB/01_buffer.md)
+    * 01_InnoDB  
+    [00_sumary](./notes_by_adzfolc/03_Storage/01_InnoDB/00_summary.md)  
+    [01_buffer](./notes_by_adzfolc/03_Storage/01_InnoDB/01_buffer.md)  
+    [02_file](./notes_by_adzfolc/03_Storage/01_InnoDB/02_file.md)  
+    [04_table](./notes_by_adzfolc/03_Storage/01_InnoDB/04_table.md)  
+    [05_index_and_algo](./notes_by_adzfolc/03_Storage/01_InnoDB/05_index_and_algo.md)  
+    [06_lock_and_latch](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_and_latch.md)
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
 
@@ -78,7 +67,7 @@
 * To Do:
     * 优化索引结构
 
-**This project is still under construction.**
+* **Casablanca is still under construction.**
 
 ## To Do List
 1. MySQL核心内幕
