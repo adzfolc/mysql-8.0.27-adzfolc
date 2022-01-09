@@ -1,6 +1,7 @@
 # 06_lock_and_latch
 
 * 看下 MySQL 8.0 Reference Manual_Chp 15.7_InnoDB Locking and Transaction Model
+* MySQL技术内幕-InnoDB存储引擎 Chp6 对照着看下
 
 1. lock and latch
     * latch
@@ -35,13 +36,14 @@
         * Intention Locks 只会全表扫描(例如 `LOCK TABLES ... WRITE`)
 
 #### Record Locks
-1. 行锁,防止其他事务更改正在操作的数据
+1. 行锁(单个行记录上的锁),防止其他事务更改正在操作的数据
 2. 行锁会锁定索引数据,如果表没有索引,InnoDB[自动创建主键(隐藏列,聚簇索引)](./05_index_and_algo.md)
 
 #### Gap Locks
 1. Definition:
     * a lock on a gap between index records
     * a lock on the gap before the first or after the last index record
+    * 间隙锁,锁定一个范围,但不包含记录本身
 2. InnoDB Gap Locks 是防止其他事务插入间隙.间隙锁可以共存.一个事务采用的间隙锁不会阻止另一个事务在同一间隙上采用间隙锁.共享和排他间隙锁之间没有区别.彼此不冲突,并且执行相同的功能.允许间隙锁冲突的原因是,如果从索引中清除记录,则必须合并由不同事务保留在记录上的间隙锁.
 3. 事务隔离级别降低到 READ COMMITTED 可以禁用 Gap Lock.
 4. InnoDB 中 where 条件判断后,不匹配的记录会释放 行锁.对于 Update 语句, InnoDB 采用 半一致性读(semi-consistent) , update 会返回最新版本,便于 InnoDB 判断行是否满足 update where conditions.
@@ -111,3 +113,14 @@
     9. INSERT 只会对插入的记录加写锁(index record lock),而非 next-key lock (在这里,没有 gap lock). INSERT 不会防止其他 session 对相邻的位置 insert .
 
     ToDo:  MySQL Manual continue from Page 3033 .
+
+## 死锁
+1. innodb_lock_wait_timeout 设置超时的时间
+2. wait-for-graph(等待图) 进行死锁检测,要求数据库存储 1.锁的信息链表 2.事务等待链表
+
+## 锁升级
+1. SQL Server
+    1. 单独一个SQL在一个对象上持有的锁数量超过阈值,默认5000.如果不同对象,不会锁升级.
+    2. 锁资源占用的内存资源超过激活内存的40%发生锁升级.
+2. InnoDB
+    1. InnoDB 没有锁升级,对事物采用 bitmap 进行锁管理.不管一个事务锁住一个或多个记录,开销通常一致.

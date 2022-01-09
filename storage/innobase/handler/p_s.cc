@@ -990,13 +990,17 @@ size_t Innodb_data_lock_wait_iterator::scan_trx(
     return 0;
   }
 
+  // 申请锁的事务ID
   ulonglong requesting_trx_id;
+  // 申请锁的线程ID
   ulonglong requesting_thread_id;
   ulonglong requesting_event_id;
   const void *requesting_identity;
   char requesting_engine_lock_id[TRX_I_S_LOCK_ID_MAX_LEN + 1];
   size_t requesting_engine_lock_id_length;
+  // 阻塞的事务ID
   ulonglong blocking_trx_id;
+  // 阻塞的线程ID
   ulonglong blocking_thread_id;
   ulonglong blocking_event_id;
   const void *blocking_identity;
