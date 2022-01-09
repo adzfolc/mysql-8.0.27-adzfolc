@@ -54,7 +54,7 @@
     [02_file](./notes_by_adzfolc/03_Storage/01_InnoDB/02_file.md)  
     [04_table](./notes_by_adzfolc/03_Storage/01_InnoDB/04_table.md)  
     [05_index_and_algo](./notes_by_adzfolc/03_Storage/01_InnoDB/05_index_and_algo.md)  
-    [06_lock_and_latch](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_and_latch.md)
+    [06_lock_latch_and_trx](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_latch_and_trx.md)
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)
 

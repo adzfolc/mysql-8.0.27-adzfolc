@@ -1,4 +1,4 @@
-# 06_lock_and_latch
+# 06_lock_latch_and_trx
 
 * 看下 MySQL 8.0 Reference Manual_Chp 15.7_InnoDB Locking and Transaction Model
 * MySQL技术内幕-InnoDB存储引擎 Chp6 对照着看下
@@ -124,3 +124,38 @@
     2. 锁资源占用的内存资源超过激活内存的40%发生锁升级.
 2. InnoDB
     1. InnoDB 没有锁升级,对事物采用 bitmap 进行锁管理.不管一个事务锁住一个或多个记录,开销通常一致.
+
+## 事务模型
+
+1. 事务模型比较熟悉了,后面补充  
+    ToDo: 补充事务模型
+2. 事务的实现,在 InnoDB 中, ACD 通过 redo+undo 完成, redolog 叫做重做日志,保证事务AC; undolog 保证事务一致性.
+3. redo/undo 都可以视为一种恢复操作, redo 恢复提交事务的页修改操作, undo 回滚行记录到某个特定版本.
+4. redo 物理日志,记录页的物理修改操作. undo 逻辑日志,根据每行记录进行记录.
+
+### redolog
+1. redolog = redolog buffer(重做日志缓冲 内存 易失) + redolog file(重做日志文件 持久)
+2. InnoDB 通过 Force Log at Commit 实现事务的持久性,当事务提交(COMMIT)时,先将事务的重做日志(redolog+undolog)持久化,事务COMMIT才算完成. -> redolog 顺序写 undolog 随机写
+
+3.  |参数|值|意义|
+    |-|-|-|
+    |innodb_flush_log_at_trx_commit|0|事务提交时不写入 redolog buffer ,由 master thread 定时任务每秒 fsync|
+    |innodb_flush_log_at_trx_commit|1|事务提交时 fysnc|
+    |innodb_flush_log_at_trx_commit|2|事务提交时将重做日志写入重做文件,写入文件系统缓存,不执行 fsync .依赖OS不宕机.|
+
+4. log block
+    1. InnoDB 中, redolog 按照 512bytes 存储 -> redolog buffer/redolog file 按照 block 存储,称为 重做日志块(redolog block)
+    2. 磁盘每个页是 512bytes , redolog 需要划分多个 block 存储.
+    3. 由于 redolog block 与 磁盘扇区 大小一致,所以 redolog 支持原子写入,不需要 double write .
+
+### binlog
+1. 二进制日志,用来进行 POINT-IN-TIME(PIT) 的恢复以及主从复制(Replication).
+
+### redolog and binlog
+1. |difference|binlog|redolog|
+   |-|-|-|
+   |产生|MySQL数据库上层,任何存储引擎的更改都会产生binlog|InnoDB存储引擎层|
+   |内容形式|逻辑日志,记录SQL语句|物理日志,记录对每个页的修改|
+   |写入|仅在事务提交时写入,事务级唯一|每个事务多条redolog,并发写入|
+
+ToDo: MySQL技术内幕-InnoDB存储引擎 Page 311
