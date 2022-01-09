@@ -81,6 +81,7 @@
 |-|-|
 |MySQL 8.0 Reference Manual|MySQL详设..?|
 |PerconaServer-for-MySQL-8.0.23-14|Percona详设..?|
+|[内核月报](https://github.com/tangwz/db-monthly)|应该没人不知道吧..?|
 |事务处理-概念与技术|好书,有讲 trx system 的设计,有很多设计的框架雏形|
 |MySQL核心内幕|正在入门,手撕引擎实现|
 |MySQL技术内幕-InnoDB存储引擎|重原理,需要自己结合参数看代码
