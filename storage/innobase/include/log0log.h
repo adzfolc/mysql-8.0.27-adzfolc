@@ -92,6 +92,11 @@ constexpr lsn_t LOG_START_LSN = 16 * OS_FILE_LOG_BLOCK_SIZE;
 /** Block number which must be > 0 and is allowed to wrap around at 1G.
 The highest bit is set to 1, if this is the first block in a call to
 fil_io (for possibly many consecutive blocks). */
+/**
+ * LOG_BLOCK_HDR_NO 标记 log block 在 log buffer 中的位置
+ * 1. 递增且循环使用,占用 4bytes
+ * 2. 首位用来判断是否 flush bit, 最大值 2G
+ */
 constexpr uint32_t LOG_BLOCK_HDR_NO = 0;
 
 /** Mask used to get the highest bit in the hdr_no field. */
@@ -101,6 +106,10 @@ constexpr uint32_t LOG_BLOCK_FLUSH_BIT_MASK = 0x80000000UL;
 constexpr uint32_t LOG_BLOCK_MAX_NO = 0x3FFFFFFFUL + 1;
 
 /** Number of bytes written to this block (also header bytes). */
+/**
+ * LOG_BLOCK_HDR_DATA_LEN 占用 2bytes,表示 log block 大小.
+ * 当 log block 被写满时,表示使用全部 log block 空间,即占用 512bytes
+ */
 constexpr uint32_t LOG_BLOCK_HDR_DATA_LEN = 4;
 
 /** Mask used to get the highest bit in the data len field,
@@ -114,11 +123,18 @@ but if it will, it will start at this offset.
 
 An archive recovery can start parsing the log records starting from this
 offset in this log block, if value is not 0. */
+/**
+ * log block 中第一个日志的偏移量
+ * iff LOG_BLOCK_FIRST_REC_GROUP==LOG_BLOCK_HDR_DATA_LEN, 当前 block 不包含新日志
+ */
 constexpr uint32_t LOG_BLOCK_FIRST_REC_GROUP = 6;
 
 /** 4 lower bytes of the value of log_sys->next_checkpoint_no when the log
 block was last written to: if the block has not yet been written full,
 this value is only updated before a log buffer flush. */
+/**
+ * log block 最后被写入时的检查点4字节的值
+ */
 constexpr uint32_t LOG_BLOCK_CHECKPOINT_NO = 8;
 
 /** Size of the log block's header in bytes. */
@@ -131,6 +147,9 @@ this did not contain the checksum, but the same value as .._HDR_NO. */
 constexpr uint32_t LOG_BLOCK_CHECKSUM = 4;
 
 /** Size of the log block footer (trailer) in bytes. */
+/**
+ * redolog log block tailer 只包含一个部分组成,与 LOG_BLOCK_HDR_NO 相同,在 log_block_init 中被初始化
+ */
 constexpr uint32_t LOG_BLOCK_TRL_SIZE = 4;
 
 static_assert(LOG_BLOCK_HDR_SIZE + LOG_BLOCK_TRL_SIZE < OS_FILE_LOG_BLOCK_SIZE,

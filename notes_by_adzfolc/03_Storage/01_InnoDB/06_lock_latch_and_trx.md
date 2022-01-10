@@ -134,6 +134,10 @@
 4. redo 物理日志,记录页的物理修改操作. undo 逻辑日志,根据每行记录进行记录.
 
 ### redolog
+
+* @see [Redo log constants and functions](../../../storage/innobase/include/log0log.h)
+* @see [Redo log types](../../../storage/innobase/include/log0types.h)
+
 1. redolog = redolog buffer(重做日志缓冲 内存 易失) + redolog file(重做日志文件 持久)
 2. InnoDB 通过 Force Log at Commit 实现事务的持久性,当事务提交(COMMIT)时,先将事务的重做日志(redolog+undolog)持久化,事务COMMIT才算完成. -> redolog 顺序写 undolog 随机写
 
@@ -147,6 +151,18 @@
     1. InnoDB 中, redolog 按照 512bytes 存储 -> redolog buffer/redolog file 按照 block 存储,称为 重做日志块(redolog block)
     2. 磁盘每个页是 512bytes , redolog 需要划分多个 block 存储.
     3. 由于 redolog block 与 磁盘扇区 大小一致,所以 redolog 支持原子写入,不需要 double write .
+    4. redolog block = log block header(12bytes) + log block body + log block tailer(8bytes). 每个 redolog block 实际大小是 512-12-8=492bytes
+    5. ![redolog_buffer](./redolog_buffer.png)
+    6. ![log_block_header](./log_block_header.png)
+    7. ![log_block_tailer](./log_block_tailer.png)
+
+5. log group
+    1. log group 重做日志组,包含多个重做日志文件. InnoDB 存储引擎只支持一个 log group(源码限制), log group 是逻辑概念,没有实际存储的物理文件表示 log group 信息. log group 由多个重做日志文件组成,每个 log group 中的日志文件大小是相同的.
+    2. 重做日志文件存储的是 redolog buffer 中保存的 redolog block(512bytes) ,也是根据块的方式进行物理存储管理.
+    3. redolog buffer 刷盘规则
+        1. 事务提交时
+        2. 当 redolog buffer 中有一半的内存空间被使用
+        3. log checkpoint
 
 ### binlog
 1. 二进制日志,用来进行 POINT-IN-TIME(PIT) 的恢复以及主从复制(Replication).
