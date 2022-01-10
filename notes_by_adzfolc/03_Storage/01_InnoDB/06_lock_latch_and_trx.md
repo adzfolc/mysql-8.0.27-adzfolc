@@ -163,9 +163,66 @@
         1. 事务提交时
         2. 当 redolog buffer 中有一半的内存空间被使用
         3. log checkpoint
+    4. log block 采用追加写入(append)在 redo log file 的最后部分,当一个 redo log file 被写满时,会接着写入写一个 redo log file ,使用方式为 round-bin.
+
+6. redolog 格式
+    1. |redo_log_type|space|page_no|redo log body|
+        |-|-|-|-|
+        |redo log 类型|表空间 ID|页的偏移量|根据 redo log 类型不同,存储内容不同|
+    
+7. lsn
+    1. lsn = Log Sequence Number ,代表日志序列号
+    2. InnoDB 中 LSN 占 8bytes ,且单调递增
+    3. LSN含义
+        * 重做日志写入的总量
+        * checkpoint 的位置
+        * 页的版本
+8. 恢复
+
+### undolog
+
+* @see [undolog](../../../storage/innobase/srv/srv0srv.cc)
+
+1. 作用
+    1. 逻辑日志,存储在表空间中
+    2. 回滚
+    3. MVCC
+    4. undolog 会产生 redolog , undolog 需要持久化
+
+2. 事务提交触发 InnoDB
+    * undo log 放入列表,触发 purge 操作
+    * 判断 undo log 所在页是否可以重用,若可重用分配给下个事务使用
+
+3. undo log 格式
+    * insert undo log - 在提交时可以删除
+    * update undo log - 在提交时不可删除,需要提供 MVCC 机制.提交时放入 undo log 链表,等待 purge 线程删除.
+
+4. purge
+    * history 列表
+    * undo log
+
+5. 参数
+    * innodb_purge_batch_size -> 每次 purge 操作需要清理的 undo page 数量
+    * innodb_max_purge_lag -> 控制 history list 长度,若 history list 长度超过 innodb_max_purge_lag 延缓 DML 行操作的执行.(delay 行的修改)
+        * 延缓算法: delay = ((length(history_list) - innodb_max_purge_lag)*10)-5
+    
+6. group commit
+    * 为了保证 存储引擎层的事务和二进制日志一致性,两者之间采用两阶段事务
+    * 2PC
+        1. 事务提交时, InnoDB 进行 prepare 操作
+        2. MySQL Server 层写入 binlog -> 参数 sync_binlog
+        3. InnoDB 存储引起层将日志写入重做日志文件 -> fsync 由参数 innodb_flush_log_at_trx_commit
+            1. 修改内存中事务对应的信息,并将日志文件写入 redolog buffer
+            2. 调用 fsync 确保日志从 redolog buffer 写入磁盘
+    * ![innodb_2pc.png](./innodb_2pc.png)
 
 ### binlog
 1. 二进制日志,用来进行 POINT-IN-TIME(PIT) 的恢复以及主从复制(Replication).
+
+2. InnoDB 采用 rollback segment ,每个回滚段种记录了1024个 undo log segment, 每个 undo log segment 进行 undo 页的申请.
+
+3. binlog group commit
+    * ![binlog group commit](./binlog_group_commit.png)
 
 ### redolog and binlog
 1. |difference|binlog|redolog|
@@ -174,4 +231,4 @@
    |内容形式|逻辑日志,记录SQL语句|物理日志,记录对每个页的修改|
    |写入|仅在事务提交时写入,事务级唯一|每个事务多条redolog,并发写入|
 
-ToDo: MySQL技术内幕-InnoDB存储引擎 Page 311
+### 内部 XA 事务

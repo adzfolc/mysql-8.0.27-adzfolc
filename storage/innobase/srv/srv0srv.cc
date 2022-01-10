@@ -140,6 +140,7 @@ uint32_t srv_rseg_init_threads = 1;
 
 /** Undo tablespace directories.  This can be multiple paths
 separated by ';' and can also be absolute paths. */
+// innodb_undo_directory 文件所在路径,可设置独立表空间
 char *srv_undo_dir = nullptr;
 
 /** The number of implicit undo tablespaces to use for rollback
@@ -152,6 +153,7 @@ ulong srv_rollback_segments = TRX_SYS_N_RSEGS;
 
 /* Used for the deprecated setting innodb_undo_logs. This will still get
 put into srv_rollback_segments if it is set to a non-default value. */
+// 设置 rollback segment 个数
 ulong srv_undo_logs = 0;
 const char *deprecated_undo_logs =
     "The parameter innodb_undo_logs is deprecated"
