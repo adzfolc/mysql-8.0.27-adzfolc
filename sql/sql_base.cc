@@ -687,6 +687,7 @@ TABLE_SHARE *get_table_share(THD *thd, const char *db, const char *table_name,
     open fails, so after cond_wait, we must repeat searching the
     hash table.
   */
+  // 先在 table_def_cache 中找到已存在的表对象 TABLE_SHARE ,如果表正在被使用,则需要等待
   for (;;) {
     auto it = table_def_cache->find(string(key, key_length));
     if (it == table_def_cache->end()) {
@@ -696,18 +697,21 @@ TABLE_SHARE *get_table_share(THD *thd, const char *db, const char *table_name,
       }
       mysql_mutex_unlock(&LOCK_open);
 
+      // 对表添加元数据锁
       if (dd::mdl_lock_schema(thd, db, MDL_TRANSACTION)) {
         // Lock LOCK_open again to preserve function contract
         mysql_mutex_lock(&LOCK_open);
         return nullptr;
       }
 
+      // LOCK_open 是 MySQL 全局互斥锁.
       mysql_mutex_lock(&LOCK_open);
       // Need to re-try the find after getting the mutex again
       continue;
     }
     share = it->second.get();
     if (!share->m_open_in_progress)
+      // 如果代码执行到这里,说明通过 table_def_cache 没有找到,说明表还未被使用,需要从数据字典找到这个表,且转换为 TABLE_SHARE*
       return process_found_table_share(thd, share, open_view);
 
     DEBUG_SYNC(thd, "get_share_before_COND_open_wait");
@@ -748,6 +752,7 @@ TABLE_SHARE *get_table_share(THD *thd, const char *db, const char *table_name,
     and TABLE_SHARE::wait_for_old_version. We must also set
     m_open_in_progress to indicate allocated but incomplete share.
   */
+  // 引用计数标识表正在使用
   share->increment_ref_count();      // Mark in use
   share->m_open_in_progress = true;  // Mark being opened
 
