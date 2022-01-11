@@ -1363,6 +1363,7 @@ Channel_info *Mysqld_socket_listener::listen_for_connection_event() {
   if (retval < 0 || connection_events_loop_aborted()) return nullptr;
 
   /* Is this a new connection request ? */
+  // 如果对于监听有消息返回,说明有连接在请求.针对不同监听方式做不同处理,分别取出其中对应的 socket ,等待进一步网络交互
   const Listen_socket *listen_socket = get_listen_socket();
   /*
     When poll/select returns control flow then at least one ready server socket
@@ -1412,6 +1413,7 @@ Channel_info *Mysqld_socket_listener::listen_for_connection_event() {
   }
 #endif  // HAVE_LIBWRAP
 
+  // 为新建连接对象创建 Channel_info
   Channel_info *channel_info = nullptr;
   if (listen_socket->m_socket_type == Socket_type::UNIX_SOCKET)
     channel_info = new (std::nothrow) Channel_info_local_socket(connect_sock);
@@ -1420,6 +1422,7 @@ Channel_info *Mysqld_socket_listener::listen_for_connection_event() {
         connect_sock, (listen_socket->m_socket_interface ==
                        Socket_interface_type::ADMIN_INTERFACE));
   if (channel_info == nullptr) {
+    // 异常处理,如果创建失败就关闭套接字,主监听线程继续工作
     (void)mysql_socket_shutdown(connect_sock, SHUT_RDWR);
     (void)mysql_socket_close(connect_sock);
     connection_errors_internal++;

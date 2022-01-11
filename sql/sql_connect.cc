@@ -886,10 +886,12 @@ static void prepare_new_connection_state(THD *thd) {
 bool thd_prepare_connection(THD *thd) {
   bool rc;
   lex_start(thd);
+  // 进行连接身份验证
   rc = login_connection(thd);
 
   if (rc) return rc;
 
+  // 线程初始化,准备执行语句
   prepare_new_connection_state(thd);
   return false;
 }

@@ -2864,6 +2864,7 @@ bool Protocol_classic::parse_packet(union COM_DATA *data,
       data->com_set_option.opt_command = uint2korr(input_raw_packet);
       break;
     }
+    // 预编译 SQL 执行
     case COM_STMT_EXECUTE: {
       if (input_packet_length < 9) goto malformed;
       uchar *read_pos = input_raw_packet;
@@ -2908,6 +2909,7 @@ bool Protocol_classic::parse_packet(union COM_DATA *data,
 
       break;
     }
+    // fetch 游标查询
     case COM_STMT_FETCH: {
       if (input_packet_length < 8) goto malformed;
       data->com_stmt_fetch.stmt_id = uint4korr(input_raw_packet);
@@ -2923,6 +2925,7 @@ bool Protocol_classic::parse_packet(union COM_DATA *data,
       data->com_stmt_send_long_data.length = input_packet_length - 6;
       break;
     }
+    // 预编译指令
     case COM_STMT_PREPARE: {
       data->com_stmt_prepare.query =
           reinterpret_cast<const char *>(input_raw_packet);
@@ -2941,6 +2944,7 @@ bool Protocol_classic::parse_packet(union COM_DATA *data,
       data->com_stmt_reset.stmt_id = uint4korr(input_raw_packet);
       break;
     }
+    // 非预编译查询
     case COM_QUERY: {
       uchar *read_pos = input_raw_packet;
       size_t packet_left = input_packet_length;

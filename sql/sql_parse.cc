@@ -1703,6 +1703,7 @@ bool dispatch_command(THD *thd, const COM_DATA *com_data,
     goto done;
   }
 
+  // 对不同报文类型进行处理
   switch (command) {
     case COM_INIT_DB: {
       LEX_STRING tmp;

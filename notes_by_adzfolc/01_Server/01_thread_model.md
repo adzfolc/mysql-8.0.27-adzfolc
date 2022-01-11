@@ -1,5 +1,6 @@
 # 01_thread_model
 
+* @see [04_connection_lifecycle](./04_connection_lifecycle.md)
 * This chapter may cotain summary of code review of server layer.
 
 1. Reactor 线程模型  
@@ -89,11 +90,24 @@
                 PSI_thread_key key [[maybe_unused]],
                 unsigned int sequence_number [[maybe_unused]], my_thread_handle *thread,
                 const my_thread_attr_t *attr, my_start_routine start_routine, void *arg)
-    Call:       result = my_thread_create(thread, attr, start_routine, arg);
-    File path:  int my_thread_create(my_thread_handle *thread, const my_thread_attr_t *attr,
-                     my_start_routine func, void *arg)
-    Call:       pthread_create(&thread->thread, attr, func, arg);
+    Call:       THD *Channel_info::create_thd()
 
+    Funciton:   THD *Channel_info::create_thd()
+    Path:       sql/conn_handler/channel_info.cc
+    Called by:  THD *thd = channel_info->create_thd() in connection_handler_per_thread.cc[File] add_connection[Function]
+    
+    // Step 8. 检测最大连接
+    File path:  sql/conn_handler/connection_handler_manager.cc
+    Function:   void Connection_handler_manager::process_new_connection(
+                Channel_info *channel_info)
+    Call:       check_and_incr_conn_count(channel_info->is_admin_connection())
+
+    // Step 9.  为 handler 分配线程
+    File path:  sql/conn_handler/connection_handler_manager.cc
+    Function:   void Connection_handler_manager::process_new_connection(
+                Channel_info *channel_info)
+    Call:       m_connection_handler->add_connection(channel_info)
+    
     ```
 
 99. 代码位置  
