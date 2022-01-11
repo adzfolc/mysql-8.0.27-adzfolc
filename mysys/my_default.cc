@@ -228,8 +228,10 @@ static int handle_default_option(void *in_ctx, const char *group_name,
 
 typedef Prealloced_array<char *, 100> My_args;
 struct handle_option_ctx {
+  // 内存空间
   MEM_ROOT *alloc;
   My_args *m_args;
+  // m_args 中参数属于哪一组
   TYPELIB *group;
 };
 

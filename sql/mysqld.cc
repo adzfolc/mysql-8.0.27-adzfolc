@@ -4773,6 +4773,7 @@ int init_common_variables() {
 
     From MySQL 5.5 onwards, the default storage engine is InnoDB.
   */
+  // 默认存储引擎
   default_storage_engine = "InnoDB";
   default_tmp_storage_engine = default_storage_engine;
 
@@ -4784,6 +4785,7 @@ int init_common_variables() {
     mysql_install_plugin(), new entries could be added
     to that list.
   */
+  // 初始化所有状态变量
   if (add_status_vars(status_vars)) return 1;  // an error was already reported
 
 #ifndef NDEBUG
@@ -4853,6 +4855,7 @@ int init_common_variables() {
   }
   update_parser_max_mem_size();
 
+  // 初始化权限检查插件
   if (set_default_auth_plugin(default_auth_plugin,
                               strlen(default_auth_plugin))) {
     LogErr(ERROR_LEVEL, ER_AUTH_CANT_SET_DEFAULT_PLUGIN);
@@ -4934,6 +4937,7 @@ int init_common_variables() {
   }
 #endif /* HAVE_SOLARIS_LARGE_PAGES */
 
+  // thread_cache_size host_cache_size 根据 max_connections 参数进行调整
   longlong default_value;
   sys_var *var;
   /* Calculate and update default value for thread_cache_size. */
@@ -4973,6 +4977,7 @@ int init_common_variables() {
     lc_messages = mysqld_default_locale_name;
   }
   global_system_variables.lc_messages = my_default_lc_messages;
+  // Read error messages from file, 所有MySQL给客户端返回的错误信息,都是通过这个操作从 errmessage 信息中读取出来
   if (init_errmessage()) /* Read error messages from file */
     return 1;
   init_client_errs();
@@ -5025,6 +5030,7 @@ int init_common_variables() {
     default_charset_info = default_collation;
   }
   /* Set collactions that depends on the default collation */
+  // 初始化默认字符集
   global_system_variables.collation_server = default_charset_info;
   global_system_variables.collation_database = default_charset_info;
   global_system_variables.default_collation_for_utf8mb4 =
@@ -5051,6 +5057,7 @@ int init_common_variables() {
                                "--character-set-filesystem");
   global_system_variables.character_set_filesystem = character_set_filesystem;
 
+  // 初始化词法分析
   if (lex_init()) {
     LogErr(ERROR_LEVEL, ER_OOM);
     return 1;
@@ -5067,6 +5074,7 @@ int init_common_variables() {
   global_system_variables.lc_time_names = my_default_lc_time_names;
 
   /* check log options and issue warnings if needed */
+  // 处理 general_log, slow_log ,根据日志存储方式确认 文件存储 / 表存储
   if (opt_general_log && opt_general_logname &&
       !(log_output_options & LOG_FILE) && !(log_output_options & LOG_NONE))
     LogErr(WARNING_LEVEL, ER_LOG_FILES_GIVEN_LOG_OUTPUT_IS_TABLE,
@@ -5077,6 +5085,7 @@ int init_common_variables() {
     LogErr(WARNING_LEVEL, ER_LOG_FILES_GIVEN_LOG_OUTPUT_IS_TABLE,
            "--slow-query-log-file option");
 
+  // general_log, slow_log 文件名
   if (opt_general_logname &&
       !is_valid_log_name(opt_general_logname, strlen(opt_general_logname))) {
     LogErr(ERROR_LEVEL, ER_LOG_FILE_INVALID, "--general_log_file",
@@ -5822,6 +5831,7 @@ static int init_server_components() {
     We need to call each of these following functions to ensure that
     all things are initialized so that unireg_abort() doesn't fail
   */
+  // 元数据锁初始化
   mdl_init();
   partitioning_init();
   if (table_def_init() | hostname_cache_init(host_cache_size))
@@ -6823,6 +6833,7 @@ int mysqld_main(int argc, char **argv)
   orig_argv = argv;
   my_getopt_use_args_separator = true;
   my_defaults_read_login_file = false;
+  // 处理配置文件及启动参数等
   if (load_defaults(MYSQL_CONFIG_NAME, load_default_groups, &argc, &argv,
                     &argv_alloc)) {
     flush_error_log_messages();
@@ -6867,6 +6878,7 @@ int mysqld_main(int argc, char **argv)
   init_pfs_instrument_array();
 #endif /* WITH_PERFSCHEMA_STORAGE_ENGINE */
 
+  // 继续处理参数变量
   heo_error = handle_early_options();
 
   init_sql_statement_names();
@@ -7113,6 +7125,7 @@ int mysqld_main(int argc, char **argv)
     Perform basic query log initialization. Should be called after
     MY_INIT, as it initializes mutexes.
   */
+  // 日志系统初始化
   query_logger.init();
 
   if (heo_error) {
@@ -7133,6 +7146,7 @@ int mysqld_main(int argc, char **argv)
     exit(MYSQLD_ABORT_EXIT);
   }
 
+  // 初始化内部系统变量
   if (init_common_variables()) {
     setup_error_log();
     unireg_abort(MYSQLD_ABORT_EXIT);  // Will do exit
@@ -7140,6 +7154,7 @@ int mysqld_main(int argc, char **argv)
 
   keyring_lockable_init();
 
+  // 信号系统初始化
   my_init_signals();
 
   size_t guardize = 0;
@@ -7337,6 +7352,7 @@ int mysqld_main(int argc, char **argv)
   /* Determine default TCP port and unix socket name */
   set_ports();
 
+  // 核心模块启动,包括存储引擎等
   if (init_server_components()) unireg_abort(MYSQLD_ABORT_EXIT);
 
   if (!server_id_supplied)
@@ -7478,6 +7494,7 @@ int mysqld_main(int argc, char **argv)
   }
 
   if (init_ssl_communication()) unireg_abort(MYSQLD_ABORT_EXIT);
+  // 网络系统初始化
   if (network_init()) unireg_abort(MYSQLD_ABORT_EXIT);
 
 #ifdef _WIN32
@@ -7587,10 +7604,12 @@ int mysqld_main(int argc, char **argv)
     udf_read_functions_table();
   }
 
+  // 状态变量初始化
   init_status_vars();
   /* If running with --initialize, do not start replication. */
   if (opt_initialize) opt_skip_replica_start = true;
 
+  // binlog 相关检查初始化
   check_binlog_cache_size(nullptr);
   check_binlog_stmt_cache_size(nullptr);
 

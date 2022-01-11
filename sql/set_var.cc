@@ -113,6 +113,7 @@ bool get_sysvar_source(const char *name, uint length,
 
 sys_var_chain all_sys_vars = {nullptr, nullptr};
 
+// 系统参数初始化
 int sys_var_init() {
   DBUG_TRACE;
 

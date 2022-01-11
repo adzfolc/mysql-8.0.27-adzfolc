@@ -2336,6 +2336,7 @@ void grant_free(void) {
     @retval true  Could not initialize grant subsystem.
 */
 
+// opt_noacl==0 才被执行
 bool grant_init(bool skip_grant_tables) {
   THD *thd;
   bool return_val;
