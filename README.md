@@ -43,8 +43,12 @@
 [00_server_mmary](./notes_by_adzfolc/01_Server/00_server_summary.md)  
 [01_thread_model](./notes_by_adzfolc/01_Server/01_thread_model.md)  
 [02_memory_management](./notes_by_adzfolc/01_Server/02_memory_management.md)  
+[03_mysqld_main](./notes_by_adzfolc/01_Server/03_mysqld_main.md)  
+[04_connection_lifecycle](./notes_by_adzfolc/01_Server/04_connection_lifecycle.md)  
+
 * 02_sql  
-[00_sql_parser_and_optimizer](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)
+[00_sql_parser_and_optimizer](./notes_by_adzfolc/02_SQL/00_sql_parser_and_optimizer.md)  
+
 * 03_storage  
 [00_storage_layer_intro](./notes_by_adzfolc/03_Storage/00_storage_layer_intro.md)  
 [01_mysql_meta_data](./notes_by_adzfolc/03_Storage/01_mysql_meta_data.md)  
@@ -54,9 +58,10 @@
     [02_file](./notes_by_adzfolc/03_Storage/01_InnoDB/02_file.md)  
     [04_table](./notes_by_adzfolc/03_Storage/01_InnoDB/04_table.md)  
     [05_index_and_algo](./notes_by_adzfolc/03_Storage/01_InnoDB/05_index_and_algo.md)  
-    [06_lock_latch_and_trx](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_latch_and_trx.md)
+    [06_lock_latch_and_trx](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_latch_and_trx.md)  
+
 * 99_QA  
-[99_QA](./notes_by_adzfolc/99_QA.md)
+[99_QA](./notes_by_adzfolc/99_QA.md)  
 
 ## Expandsion
 * Based on tourtial, I implement a storage engine called Casablanca.Source code path is storage/casablanca.
