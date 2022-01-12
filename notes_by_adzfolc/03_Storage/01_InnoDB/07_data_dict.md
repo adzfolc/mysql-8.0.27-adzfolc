@@ -69,3 +69,9 @@
         4. 加载索引信息
             加载索引从 SYS_INDEXES 中查询的,原理与 SYS_COLUMNS 一样. SYS_INDEXES 主键是 (TABLE_ID,ID) ,所以具有相同 TABLE_ID 的索引都是按照 ID 进行排序的.每条记录对应一个索引,需要加载 ID/NAME/N_FIELDS/TYPE/PAGENO/SPACE 等信息. 
             * @see `static dberr_t dict_load_indexes` in [dict0load.cc](../../../storage/innobase/dict/dict0load.cc)
+
+3. Rowid 管理
+    * 当表没有定义主键,需要 Rowid 作为聚簇索引列的时候,才会分配给表. Rowid 的管理分配,不是一个表独享一个 ID 空间,而是全局的,所有的表都共享这个 ID 号.
+    * 优化:
+        1. InnoDB 没分配一个 Rowid ,系统只在内存中 +1,不会修改页面.只有 Rowid 是256的倍数才会写入一次.
+        2. 为了防止 Rowid 因为系统崩溃没有即使更新,启动后 dict_boot() 函数会将上次写入的 Rowid 值向上对齐256再加上256.缺点是,可能会跳过很多 id ,导致 Rowid 增长过快.
