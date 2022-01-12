@@ -102,5 +102,5 @@
 |[深入理解MySQL核心技术](https://book.douban.com/subject/4022870/)/[Understanding MySQL Internals](https://book.douban.com/subject/1924288/)|看过部分,古早版本的代码|
 |[MySQL是怎样运行的](https://book.douban.com/subject/35231266/)|原理+口水书,写的不严肃.讲 Redo Undo Buffer 的模块很详细,结合代码看看|
 |[MySQL Concurrency](https://book.douban.com/subject/35533870/)|没听说过也没看过|
-|MySQL Group Replication_ The Magic Explained v1/[v2](https://www.percona.com/live/19/sessions/mysql-group-replication-the-magic-explained-v2)|Oracle Slides,应该靠谱,没看|
+|MySQL Group Replication_ The Magic Explained v1/[v2](https://www.percona.com/live/19/sessions/mysql-group-replication-the-magic-explained-v2)|[Oracle Slides](https://www.slideshare.net/lefred.descamps/presentations),应该靠谱,没看|
 |[数据库查询优化器的艺术](https://book.douban.com/subject/25815707/)|SQL 可看可不看...|
