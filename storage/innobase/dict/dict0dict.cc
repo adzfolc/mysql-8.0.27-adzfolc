@@ -130,6 +130,7 @@ static_assert(DATA_TRX_ID_LEN == 6, "DATA_TRX_ID_LEN != 6");
 static_assert(DATA_ITT_N_SYS_COLS == 2, "DATA_ITT_N_SYS_COLS != 2");
 
 /** the dictionary system */
+// 全局的字典结构
 dict_sys_t *dict_sys = nullptr;
 
 /** The set of SE private IDs of DD tables. Used to tell whether a table is

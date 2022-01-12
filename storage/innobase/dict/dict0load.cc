@@ -1600,6 +1600,7 @@ static inline space_id_t dict_check_sys_tables(bool validate) {
 }
 
 /** Loads definitions for table columns. */
+// 从 SYS_COLUMNS 中加载所有 target table 的列信息
 static void dict_load_columns(dict_table_t *table, /*!< in/out: table */
                               mem_heap_t *heap)    /*!< in/out: memory heap
                                                    for temporary storage */
@@ -1781,6 +1782,7 @@ func_exit:
  cache.
  @return DB_SUCCESS if ok, DB_CORRUPTION if corruption of dictionary
  table or DB_UNSUPPORTED if table has unknown index type */
+// 加载表中索引的定义,并且添加到 数据字典缓存 中.
 static dberr_t dict_load_indexes(
     dict_table_t *table, /*!< in/out: table */
     mem_heap_t *heap,    /*!< in: memory heap for temporary storage */
@@ -2155,6 +2157,7 @@ void dict_get_and_save_space_name(dict_table_t *table, bool dict_mutex_own) {
   }
 }
 
+// 从数据字典中新加载表
 dict_table_t *dict_load_table(const char *name, bool cached,
                               dict_err_ignore_t ignore_err,
                               const std::string *prev_table) {
@@ -2174,11 +2177,13 @@ dict_table_t *dict_load_table(const char *name, bool cached,
 
   ut_ad(dict_sys_mutex_own());
 
+  // 从字典表缓存中查看表是否存在,返回 dict_table_t
   result = dict_table_check_if_in_cache_low(name);
 
   table_name.m_name = const_cast<char *>(name);
 
   if (!result) {
+    // 从数据字典中查找表信息
     result = dict_load_table_one(table_name, cached, ignore_err, fk_list,
                                  &cur_table);
     while (!fk_list.empty()) {
@@ -2316,6 +2321,7 @@ void dict_load_tablespace(dict_table_t *table, mem_heap_t *heap,
   ut::free(filepath);
 }
 
+// 从数据字典中查找表信息
 static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
                                          dict_err_ignore_t ignore_err,
                                          dict_names_t &fk_tables,
@@ -2338,6 +2344,8 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
 
   ut_ad(dict_sys_mutex_own());
 
+  // 先找到系统表 SYS_TABLES ,根据这个表的结构,拼出一个记录来.
+  // 通过这条记录,去 SYS_TABLES 表中查找到想要的表.
   dict_table_t *sys_tables = dict_table_get_low("SYS_TABLES", prev_table);
   if (sys_tables == nullptr) {
     return nullptr;
@@ -2358,6 +2366,7 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
   ut_ad(name_of_col_is(sys_tables, sys_index, DICT_FLD__SYS_TABLES__SPACE,
                        "SPACE"));
 
+  // 构造出 SYS_TABLES 格式的元组
   tuple = dtuple_create(heap, 1);
   dfield = dtuple_get_nth_field(tuple, 0);
 
@@ -2384,15 +2393,22 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
 
     dfield_set_data(dfield, orig_name.c_str(), orig_name.length());
   } else {
+    // 设置搜索列信息,因为主键是 NAME 列,直接通过这个列搜索即可.
+    // 找到唯一想要查找的表信息,如果没有找到,则没有这个表.
     dfield_set_data(dfield, name.m_name, ut_strlen(name.m_name));
   }
 
   dict_index_copy_types(tuple, sys_index, 1);
 
+  // 打开 B+ 树,创建游标,对树进行搜索,搜索模式是 GE (>=)
   btr_pcur_open_on_user_rec(sys_index, tuple, PAGE_CUR_GE, BTR_SEARCH_LEAF,
                             &pcur, &mtr);
+  // 搜索完成,取出游标找到相应的记录.
+  // 如果没有找到的话,记录就是一个特殊值.
   rec = btr_pcur_get_rec(&pcur);
 
+  // 处理没有找到,或者这条记录被删除了(打了删除标记)的情况.
+  // 如果记录为特殊值,则关闭游标及 B+ 树搜索,退出,再返回 NULL 值.
   if (!btr_pcur_is_on_user_rec(&pcur) || rec_get_deleted_flag(rec, 0)) {
     /* Not found */
   err_exit:
@@ -2406,11 +2422,14 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
   field = rec_get_nth_field_old(rec, DICT_FLD__SYS_TABLES__NAME, &len);
 
   /* Check if the table name in record is the searched one */
+  // 如果查到的表不是目标对象,则返回异常
   if (!is_stats && (len != ut_strlen(name.m_name) ||
                     0 != ut_memcmp(name.m_name, field, len))) {
     goto err_exit;
   }
 
+  // 解读找到的这条表记录,创建一个 table 对象.
+  // table 就是被加载的最原始的表信息,不包含 列/索引/外键 等信息.
   err_msg = dict_load_table_low(name, rec, &table);
 
   if (err_msg) {
@@ -2418,13 +2437,15 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
     goto err_exit;
   }
 
+  // 对 SYS_TABLES 的搜索完成,关闭游标,执行 mtr_commit .
   btr_pcur_close(&pcur);
   mtr_commit(&mtr);
 
   dict_load_tablespace(table, heap, ignore_err);
 
+  // 从 SYS_COLUMNS 中加载所有 target table 的列信息
   dict_load_columns(table, heap);
-
+  // 给 target table 添加 virtual col 信息
   dict_load_virtual(table, heap);
 
   dict_table_add_system_columns(table, heap);
@@ -2440,6 +2461,7 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
       !(ignore_err & DICT_ERR_IGNORE_RECOVER_LOCK) && table->ibd_file_missing
           ? DICT_ERR_IGNORE_ALL
           : ignore_err;
+  // 加载表中的所有索引信息
   err = dict_load_indexes(table, heap, index_load_err);
 
   if (err == DB_SUCCESS) {
@@ -2447,6 +2469,7 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
         !dict_load_is_system_table(table->name.m_name)) {
       table->id = table->id + DICT_MAX_DD_TABLES;
     }
+    // 如果需要,将这些信息加入到字典缓存中.
     if (cached) {
       dict_table_add_to_cache(table, TRUE, heap);
     }
@@ -2515,6 +2538,7 @@ static dict_table_t *dict_load_table_one(table_name_t &name, bool cached,
   if (!cached || table->ibd_file_missing) {
     /* Don't attempt to load the indexes from disk. */
   } else if (err == DB_SUCCESS) {
+    // 加载表中的所有外键信息
     err = dict_load_foreigns(table->name.m_name, nullptr, true, true,
                              ignore_err, fk_tables);
 
@@ -2571,6 +2595,7 @@ func_exit:
 
   ut_ad(err != DB_SUCCESS || dict_foreign_set_validate(*table));
 
+  // 返回完整信息的表结构
   return table;
 }
 

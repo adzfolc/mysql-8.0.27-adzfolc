@@ -81,7 +81,7 @@
     3. P230
 2. MySQL技术内幕-InnoDB存储引擎 P330
 3. MySQL 8.0 Reference Manual P3033
-4. MySQL 运维内参 Chp4 P70
+4. MySQL 运维内参 P109 表的打开与加载
 
 ## Recommend Materials
 |Book|Comment|

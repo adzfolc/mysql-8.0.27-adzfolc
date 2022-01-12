@@ -64,7 +64,7 @@
     1. Start
       * @see ![innodb_start](./innodb_start.png)      
     2. Shutdown
-      * @see 
+      * @see ![innodb_shutdown]
 
 3. ibdata 文件存放 InnoDB元数据( InnoDB 数据字典), insert buffer, change buffer, doublewrite buffer, undologs.
 

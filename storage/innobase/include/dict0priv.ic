@@ -34,6 +34,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "dict0load.h"
 #include "dict0priv.h"
 
+// 普通用户表加载过程
 inline dict_table_t *dict_table_get_low(const char *table_name,
                                         const std::string *prev_table) {
   dict_table_t *table;
@@ -41,8 +42,12 @@ inline dict_table_t *dict_table_get_low(const char *table_name,
   ut_ad(table_name);
   ut_ad(dict_sys_mutex_own());
 
+  // 先从表缓存中找这个表
   table = dict_table_check_if_in_cache_low(table_name);
 
+  /* 如果找到了,已经损坏,则要在日志中报错,并提示可通过 innodb_force_load_corrupted 参数忽略异常
+   * 但是需要尽量避免,因为只有查找问题及一些特殊场景才会使用这个参数
+  */
   if (table && table->is_corrupted()) {
     ib::error error(ER_IB_MSG_1229);
     error << "Table " << table->name << "is corrupted";
@@ -53,17 +58,20 @@ inline dict_table_t *dict_table_get_low(const char *table_name,
     }
   }
 
+  // 如果表缓存中没有找到,就从数据字典表中寻找,需要查找系统表
   if (table == nullptr) {
     table = dict_load_table(table_name, true, DICT_ERR_IGNORE_NONE, prev_table);
   }
 
   ut_ad(!table || table->cached);
 
+  // 最后不管有没有找到,都返回这个对象,有可能是 NULL 值
   return (table);
 }
 
 /** Checks if a table is in the dictionary cache.
  @return table, NULL if not found */
+// 从字典表缓存中查看表是否存在,返回 dict_table_t
 static inline dict_table_t *dict_table_check_if_in_cache_low(
     const char *table_name) /*!< in: table name */
 {

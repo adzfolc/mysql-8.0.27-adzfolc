@@ -990,6 +990,7 @@ struct dict_persist_t;
 extern dict_persist_t *dict_persist;
 
 /* Dictionary system struct */
+// 全局的字典结构
 struct dict_sys_t {
 #ifndef UNIV_HOTBACKUP
   DictSysMutex mutex;          /*!< mutex protecting the data
@@ -1006,8 +1007,11 @@ struct dict_sys_t {
                                header and flushed to a file; in
                                recovery this must be derived from
                                the log records */
+  // table_hash & table_id_hash store cache of all tables in InnoDB, including sys tables and user tables
+  // table_hash -> 按照名字缓存表信息
   hash_table_t *table_hash;    /*!< hash table of the tables, based
                                on name */
+  // table_id_hash -> 按照 ID 缓存表信息
   hash_table_t *table_id_hash; /*!< hash table of the tables, based
                                on id */
   lint size;                   /*!< varying space in bytes occupied
@@ -1031,6 +1035,7 @@ struct dict_sys_t {
   using Table_LRU_list_base = UT_LIST_BASE_NODE_T(dict_table_t, table_LRU);
 
   /** List of tables that can be evicted from the cache */
+  // LRU 链表用来管理表对象的缓存,涉及淘汰操作
   Table_LRU_list_base table_LRU;
   /** List of tables that can't be evicted from the cache */
   Table_LRU_list_base table_non_LRU;

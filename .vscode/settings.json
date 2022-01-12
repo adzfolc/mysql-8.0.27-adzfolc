@@ -5,6 +5,7 @@
         "exception": "cpp",
         "new": "cpp",
         "streambuf": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "univ.i": "cpp"
     }
 }
