@@ -98,7 +98,7 @@
 |[MySQL内核-INNODB存储引擎](https://book.douban.com/subject/25872763/)|好书,代码古早版本,宏观能对上|
 |[高性能MySQL](https://book.douban.com/subject/23008813/)|听说过没看过|
 |[Introducing InnoDB Cluster](https://book.douban.com/subject/30349999/)|没听说过也没看过|
-|Expert MySQL|听说过没看过|
+|[Expert MySQL](https://book.douban.com/subject/2751144/)|听说过没看过|
 |[深入理解MySQL核心技术](https://book.douban.com/subject/4022870/)/[Understanding MySQL Internals](https://book.douban.com/subject/1924288/)|看过部分,古早版本的代码|
 |[MySQL是怎样运行的](https://book.douban.com/subject/35231266/)|原理+口水书,写的不严肃.讲 Redo Undo Buffer 的模块很详细,结合代码看看|
 |[MySQL Concurrency](https://book.douban.com/subject/35533870/)|没听说过也没看过|
