@@ -86,20 +86,21 @@
 ## Recommend Materials
 |Book|Comment|
 |-|-|
-|MySQL 8.0 Reference Manual|MySQL概设..?|
-|[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)|MySQL详设|
-|PerconaServer-for-MySQL-8.0.23-14|Percona详设..?|
-|[内核月报](https://github.com/tangwz/db-monthly)|应该没人不知道吧..?|
-|事务处理-概念与技术|好书,有讲 trx system 的设计,有很多设计的框架雏形|
-|MySQL核心内幕|正在入门,手撕引擎实现|
-|MySQL技术内幕-InnoDB存储引擎|重原理,需要自己结合参数看代码
-|MySQL运维内参|讲实现的,有 MGR|
-|MySQL内核-INNODB存储引擎|好书,代码古早版本,宏观能对上|
-|高性能MySQL|听说过没看过|
-|Introducing InnoDB Cluster Learning the MySQL High Availability Stack by Charles Bell|没听说过也没看过|
+|MySQL 8.0 Reference Manual|MySQL使用手册|
+|[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)|MySQL内核详设|
+|PerconaServer-for-MySQL-8.0.23-14|Percona详设,含 Myrocks/Toukudb|
+|[内核月报](https://github.com/tangwz/db-monthly)|YYDS|
+|[网易杭研InnoDB分享](https://z.itpub.net/stack/detail/10123)|讲的很好,需要自己去研究|
+|[事务处理-概念与技术](https://book.douban.com/subject/1144543/)|好书,有讲 trx system 的设计,有很多设计的框架雏形|
+|[MySQL核心内幕](https://book.douban.com/subject/4219798/)|正在入门,手撕引擎实现|
+|[MySQL技术内幕-InnoDB存储引擎](https://book.douban.com/subject/24708143/)|重原理,需要自己结合参数看代码
+|[MySQL运维内参](https://book.douban.com/subject/27044364/)|讲实现的,有 MGR|
+|[MySQL内核-INNODB存储引擎](https://book.douban.com/subject/25872763/)|好书,代码古早版本,宏观能对上|
+|[高性能MySQL](https://book.douban.com/subject/23008813/)|听说过没看过|
+|[Introducing InnoDB Cluster](https://book.douban.com/subject/30349999/)|没听说过也没看过|
 |Expert MySQL|听说过没看过|
-|深入理解MySQL核心技术/Understanding MySQL Internals Discovering and Improving a Great Database|看过部分,古早版本的代码|
-|MySQL是怎样运行的|原理+口水书,写的不严肃.讲 Redo Undo Buffer 的模块很详细,结合代码看看|
-|MySQL Concurrency Locking and Transactions for MySQL Developers and DBAs|没听说过也没看过|
-|MySQL Group Replication_ The Magic Explained v1/v2|Oracle Slides,应该靠谱,没看|
-|数据库查询优化器的艺术 原理解析与SQL性能优化|SQL 可看可不看...|
+|[深入理解MySQL核心技术](https://book.douban.com/subject/4022870/)/[Understanding MySQL Internals](https://book.douban.com/subject/1924288/)|看过部分,古早版本的代码|
+|[MySQL是怎样运行的](https://book.douban.com/subject/35231266/)|原理+口水书,写的不严肃.讲 Redo Undo Buffer 的模块很详细,结合代码看看|
+|[MySQL Concurrency](https://book.douban.com/subject/35533870/)|没听说过也没看过|
+|MySQL Group Replication_ The Magic Explained v1/[v2](https://www.percona.com/live/19/sessions/mysql-group-replication-the-magic-explained-v2)|Oracle Slides,应该靠谱,没看|
+|[数据库查询优化器的艺术](https://book.douban.com/subject/25815707/)|SQL 可看可不看...|
