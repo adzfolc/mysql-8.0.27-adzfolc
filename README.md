@@ -94,7 +94,7 @@
 |[事务处理-概念与技术](https://book.douban.com/subject/1144543/)|好书,有讲 trx system 的设计,有很多设计的框架雏形|
 |[MySQL核心内幕](https://book.douban.com/subject/4219798/)|正在入门,手撕引擎实现|
 |[MySQL技术内幕-InnoDB存储引擎](https://book.douban.com/subject/24708143/)|重原理,需要自己结合参数看代码
-|[MySQL运维内参](https://book.douban.com/subject/27044364/)|讲实现的,有 MGR|
+|[MySQL运维内参](https://book.douban.com/subject/27044364/)|讲实现的,有 MGR ,书结合最新代码能凑合看|
 |[MySQL内核-INNODB存储引擎](https://book.douban.com/subject/25872763/)|好书,代码古早版本,宏观能对上|
 |[高性能MySQL](https://book.douban.com/subject/23008813/)|听说过没看过|
 |[Introducing InnoDB Cluster](https://book.douban.com/subject/30349999/)|没听说过也没看过|
