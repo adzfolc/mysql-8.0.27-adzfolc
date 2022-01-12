@@ -90,7 +90,7 @@
 |[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)|MySQL内核详设|
 |PerconaServer-for-MySQL-8.0.23-14|Percona详设,含 Myrocks/Toukudb|
 |[内核月报](https://github.com/tangwz/db-monthly)|YYDS|
-|[网易杭研InnoDB分享](https://z.itpub.net/stack/detail/10123)|讲的很好,需要自己去研究|
+|[网易杭研InnoDB分享](https://z.itpub.net/stack/detail/10123)|讲的很好,内容侧重 MGR |
 |[事务处理-概念与技术](https://book.douban.com/subject/1144543/)|好书,有讲 trx system 的设计,有很多设计的框架雏形|
 |[MySQL核心内幕](https://book.douban.com/subject/4219798/)|正在入门,手撕引擎实现|
 |[MySQL技术内幕-InnoDB存储引擎](https://book.douban.com/subject/24708143/)|重原理,需要自己结合参数看代码
