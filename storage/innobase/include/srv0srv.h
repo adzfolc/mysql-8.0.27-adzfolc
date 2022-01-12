@@ -664,12 +664,16 @@ controlling the InnoDB shutdown.
 If innodb_fast_shutdown=0, InnoDB shutdown will purge all undo log
 records (except XA PREPARE transactions) and complete the merge of the
 entire change buffer, and then shut down the redo log.
+全量的回滚段 purge 操作, change buffer merge 操作,所有日志刷入日志文件及磁盘,将所有 buffer pool 中脏页刷入到数据文件及磁盘. -> 最慢,最安全
 
 If innodb_fast_shutdown=1, InnoDB shutdown will only flush the buffer
 pool to data files, cleanly shutting down the redo log.
+所有日志文件刷入日志文件及磁盘,所有 buffer pool 脏页输入数据文件及磁盘
 
 If innodb_fast_shutdown=2, shutdown will effectively 'crash' InnoDB
-(but lose no committed transactions). */
+(but lose no committed transactions).
+只有将已产生的日志刷入到磁盘,其他操作都不会做.实际效果相当于一次异常退出(crash),如果此时再重启数据库,会做 Crash Recovery ,因为 buffer pool 的脏数据,肯定存在没有被写入数据文件的部分,会通过日志来恢复.
+ */
 extern ulong srv_fast_shutdown;
 extern ibool srv_innodb_status;
 
@@ -1169,6 +1173,8 @@ struct export_var_t {
   ulint innodb_sampled_pages_skipped;
   ulint innodb_num_open_files;            /*!< fil_n_files_open */
   ulint innodb_truncated_status_writes;   /*!< srv_truncated_status_writes */
+  // innodb undo 表空间
+  // RR 隔离级别下,如果一个读事务 trx0 长期不提交, trx0 后的所有写事务,为了防止这些事务再读到老数据, trx0 后的回滚段都无法释放
   ulint innodb_undo_tablespaces_total;    /*!< total number of undo tablespaces
                                           innoDB is tracking. */
   ulint innodb_undo_tablespaces_implicit; /*!< number of undo tablespaces

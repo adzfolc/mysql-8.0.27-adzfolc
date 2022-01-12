@@ -587,6 +587,7 @@ static bool recv_report_corrupt_log(const byte *ptr, int type, space_id_t space,
   return (true);
 }
 
+// 初始化日志恢复系统,当数据库异常关闭,再次启动后用初始化后的系统来存储/解析日志内容并进行恢复
 void recv_sys_init(ulint max_mem) {
   if (recv_sys->spaces != nullptr) {
     return;

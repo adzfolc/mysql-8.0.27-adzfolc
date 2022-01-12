@@ -446,6 +446,7 @@ dberr_t dict_create(void) {
 
   mtr_commit(&mtr);
 
+  // 所有系统表加载到内存中,便于处理用户 DDL 请求.系统表因为不会被修改结构,所以常驻内存.
   dberr_t err = dict_boot();
 
   return (err);

@@ -797,6 +797,9 @@ dberr_t SysTablespace::check_file_spec(bool create_new_db,
 @param[out] sum_new_sizes	sum of sizes of the new files added
 @param[out] flush_lsn		FIL_PAGE_FILE_FLUSH_LSN of first file
 @return DB_SUCCESS or error code */
+// 用来打开或创建系统数据文件(ibdata)
+// 如果文件存在,则打开,并且读取一些文件头信息
+// 如果文件不存在,则会创建新的文件,此时相当于初始化一个新的数据库实例
 dberr_t SysTablespace::open_or_create(bool is_temp, bool create_new_db,
                                       page_no_t *sum_new_sizes,
                                       lsn_t *flush_lsn) {

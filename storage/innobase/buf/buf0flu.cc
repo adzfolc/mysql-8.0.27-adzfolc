@@ -3213,6 +3213,9 @@ static void buf_flush_page_coordinator_thread(size_t n_page_cleaners) {
 
   /* We start from 1 because the coordinator thread is part of the
   same set */
+  // 创建线程 buf_flush_page_cleaner_thread ,主要工作是在后台每隔1s试图刷一次 buffer 页面,具体刷入数据需要根据系统当前负载决定.
+  // 如果 InnoDB 处于活动状态,每次刷新一个比例的页面
+  // 如果 InnoDB 空闲,每次都刷100%页面
   for (size_t i = 1; i < srv_threads.m_page_cleaner_workers_n; ++i) {
     srv_threads.m_page_cleaner_workers[i] = os_thread_create(
         page_flush_thread_key, i, buf_flush_page_cleaner_thread);

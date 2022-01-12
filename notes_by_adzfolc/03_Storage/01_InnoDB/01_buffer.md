@@ -65,7 +65,7 @@
         2. Insert Buffer Bitmap 页被追踪到该辅助索引页已无可用空间 -> Merge Insert Buffer 后检测到可用空间小于1/32页,强制 Merge.
         3. Master Thread -> 定时任务,根据 srv_innodb_io_capacity 百分比合并.
 
-4. Double Write
+4. Double Write Buffer
     * 两个部分,内存中的 doublewrite buffer(2MB) 及 磁盘上表空间中连续128个页,2个区(2MB)
     * Redolog Buffer 刷脏,每1MB通过 memcpy 拷贝到内存的 doublewrite buffer,分两次,每次1MB顺序写入表空间,然后立刻fsync.
     * double write 写入页数:写入次数 ~ 64:1
@@ -78,7 +78,9 @@
 
 7. 刷新邻近页
     * 刷当前页时检测临近页的脏页,一起刷盘.
-    
+
+8. ibdata 文件存放 InnoDB元数据( InnoDB 数据字典), insert buffer, change buffer, doublewrite buffer, undologs.
+
 ## 参数
 
 1. innodb_io_capacity

@@ -439,6 +439,8 @@ static dberr_t create_log_files(char *logfilename, size_t dirnamelen, lsn_t lsn,
     }
   }
 
+  // 日志系统初始化,关于整个 InnoDB 存储引擎所有日志相关的初始化工作.
+  // 日志写入, LSN 管理, 检查点(checkpoint),日志刷盘,数据恢复
   if (!log_sys_init(srv_n_log_files, srv_log_file_size,
                     dict_sys_t::s_log_space_first_id)) {
     return (DB_ERROR);
@@ -1246,6 +1248,7 @@ static dberr_t srv_undo_tablespaces_create() {
 the construction list should be created and filled with zeros.
 @param[in]	create_new_db	whether to create a new database
 @return DB_SUCCESS or error code */
+// server undo 表空间构造, create_new_db 代表是否需要创建新的数据库
 static dberr_t srv_undo_tablespaces_construct(bool create_new_db) {
   mtr_t mtr;
 
@@ -1864,6 +1867,7 @@ static lsn_t srv_prepare_to_delete_redo_log_files(ulint n_files) {
   return (flushed_lsn);
 }
 
+// InnoDB 启动
 dberr_t srv_start(bool create_new_db) {
   lsn_t flushed_lsn;
 
@@ -2383,6 +2387,7 @@ files_checked:
 
   mtr_t::s_logging.init();
 
+  // 如果创建新的数据库
   if (create_new_db) {
     ut_a(!srv_read_only_mode);
 
@@ -2403,6 +2408,7 @@ files_checked:
 
     mtr_start(&mtr);
 
+    // 在系统文件 ibdata 的开始分配空间,回滚段系统页面,数据字典管理页面
     bool ret = fsp_header_init(0, sum_of_new_sizes, &mtr, false);
 
     mtr_commit(&mtr);
@@ -2415,6 +2421,8 @@ files_checked:
     the first rollback segment before the double write buffer.
     All the remaining rollback segments will be created later,
     after the double write buffers haves been created. */
+    // 事务系统存储初始化
+    // 事务系统使用的页面为5号页面,即 ibdata 的6号页面,这个页面存储的比较重要的东西是事务 id ,因为事务 id 在 MVCC 及事务 ACID 管理很重要,且不能重复,所以被固化在这个页面中.
     trx_sys_create_sys_pages();
 
     trx_purge_sys_mem_create();
@@ -2426,6 +2434,7 @@ files_checked:
 
     trx_purge_sys_initialize(srv_threads.m_purge_workers_n, purge_queue);
 
+    // 新建库需要新建数据字典,分配 ibdata 8 号页面,存储数据字典的几个 ID 值.(rowid,表id,索引id,当前表空间最大id)
     err = dict_create();
 
     if (err != DB_SUCCESS) {
@@ -2457,6 +2466,7 @@ files_checked:
     /* We always create the legacy double write buffer to preserve the
     expected page ordering of the system tablespace.
     FIXME: Try and remove this requirement. */
+    // 创建 double write buffer
     err = dblwr::v1::create();
 
     if (err != DB_SUCCESS) {
@@ -2468,6 +2478,7 @@ files_checked:
     requird to check for stray reads and writes trying to access this
     reserved region in the sys tablespace.
     FIXME: Try and remove this requirement. */
+    // 初始化 double write buffer
     err = dblwr::v1::init();
 
     if (err != DB_SUCCESS) {
@@ -2483,13 +2494,15 @@ files_checked:
 
     /* We always try to do a recovery, even if the database had
     been shut down normally: this is the normal startup path */
-
+    // __adzfolc__ recovery_start 物理操作InnoDB 打开表已存在的表空间文件后会进行备份恢复
+    // 纯物理操作,完全 redo 操作,所有没有写到数据页面的日志重做一遍,后面在执行 trx_sys_init_at_db_start 时,需要加载所有需要处理的事务,要找到每个要处理的回滚段,数据需要在恢复完成后才能被读取.
     err = recv_recovery_from_checkpoint_start(*log_sys, flushed_lsn);
 
     if (err == DB_SUCCESS) {
       arch_page_sys->post_recovery_init();
 
       /* Initialize the change buffer. */
+      // 与新建库不同,此处只会将所有系统表加载到内存,不会创建数据字典及初始化字典存储页面
       err = dict_boot();
     }
 
@@ -2554,6 +2567,9 @@ files_checked:
       ib::error(ER_IB_MSG_1139);
 
       /* Set the abort flag to true. */
+      // __adzfolc__ recovery_finish 逻辑操作 执行回滚操作(undo)
+      // 回滚是对于事务而言,所以是逻辑的,需要在 trx_sys_init_at_db_start 执行后,才能执行 recovery_finsh.
+      // 执行 recovery_finsh 时,需要保证回滚段数据的正确性,因为回滚段的读写也是通过 buffer pool 来实现的,所以需要在 REDO 恢复完成后,回滚段的数据才是完整的,才能进行回滚.
       auto p = recv_recovery_from_checkpoint_finish(*log_sys, true);
 
       ut_a(p == nullptr);
@@ -2735,6 +2751,7 @@ files_checked:
 
     /* The purge system needs to create the purge view and
     therefore requires that the trx_sys is inited. */
+    // 初始化事务系统,将回滚段中需要的事务加载进来,包括 insert 回滚段 及 update 回滚段,为后续操作做准备.
     purge_queue = trx_sys_init_at_db_start();
 
     if (srv_is_upgrade_mode) {
@@ -3005,11 +3022,15 @@ void srv_start_purge_threads() {
     return;
   }
 
+  // srv_purge_coordinator_thread -> 生产者
+  // srv_worker_thread -> 消费者
+  // 创建线程 srv_purge_coordinator_thread
   srv_threads.m_purge_coordinator =
       os_thread_create(srv_purge_thread_key, 0, srv_purge_coordinator_thread);
 
   srv_threads.m_purge_workers[0] = srv_threads.m_purge_coordinator;
 
+  // 创建线程 srv_worker_thread
   /* We've already created the purge coordinator thread above. */
   for (size_t i = 1; i < srv_threads.m_purge_workers_n; ++i) {
     srv_threads.m_purge_workers[i] =
@@ -3027,6 +3048,7 @@ void srv_start_purge_threads() {
 
 /** Start up the InnoDB service threads which are independent of DDL recovery
 @param[in]	bootstrap	True if this is in bootstrap */
+// 启动 master thread
 void srv_start_threads(bool bootstrap) {
   if (!srv_read_only_mode) {
     /* Before 8.0, it was master thread that was doing periodical
@@ -3459,6 +3481,7 @@ static lsn_t srv_shutdown_log() {
   ut_a(!buf_flush_page_cleaner_is_active());
   ut_a(buf_pool_check_no_pending_io() == 0);
 
+  // srv_fast_shutdown == 2 相当于一次宕机操作
   if (srv_fast_shutdown == 2) {
     if (!srv_read_only_mode) {
       ib::info(ER_IB_MSG_1253);
@@ -3472,7 +3495,10 @@ static lsn_t srv_shutdown_log() {
       a crash recovery. We must not write the lsn stamps
       to the data files, since at a startup InnoDB deduces
       from the stamps if the previous shutdown was clean. */
-
+      /* 将所有已经产生的日志内容写入到日志文件及磁盘中,而不会 buffer 刷脏页.
+      需要注意的是,即使要快速关闭数据库,还是必须把日志刷盘.因为如果不对日志刷盘,
+      就可能丢数据,就真的宕机了.
+      */
       log_stop_background_threads(*log_sys);
     }
 
@@ -3481,6 +3507,7 @@ static lsn_t srv_shutdown_log() {
 
     srv_shutdown_set_state(SRV_SHUTDOWN_LAST_PHASE);
 
+    // 快速关闭,这里直接结束了 srv_shutdown_log 的工作,下面所有操作不会再做,直接 return lsn 号返回.
     return (log_get_lsn(*log_sys));
   }
 
@@ -3502,12 +3529,15 @@ static lsn_t srv_shutdown_log() {
   log_background_threads_inactive_validate(*log_sys);
   buf_must_be_all_freed();
 
+  // 到了这一步,说明数据库是正常关闭,不是快速关闭.获取当前 redolog system 的 lsn 号
   const lsn_t lsn = log_get_lsn(*log_sys);
 
+  // 将文件刷盘,保证所有文件的写入都落在磁盘上
   if (!srv_read_only_mode) {
     fil_flush_file_spaces(to_int(FIL_TYPE_TABLESPACE) | to_int(FIL_TYPE_LOG));
   }
 
+  // 将最新的 LSN 写入到 ibdata 相应的位置中去
   srv_shutdown_set_state(SRV_SHUTDOWN_LAST_PHASE);
 
   if (srv_downgrade_logs) {
@@ -3572,6 +3602,7 @@ void srv_thread_delay_cleanup_if_needed(bool wait_for_signal) {
 }
 
 /** Shut down the InnoDB database. */
+// InnoDB 关闭
 void srv_shutdown() {
   ut_d(trx_sys_after_pre_dd_shutdown_validate());
 

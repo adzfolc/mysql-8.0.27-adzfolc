@@ -1015,6 +1015,7 @@ bool fsp_header_dict_get_server_version(uint *version) {
   return (false);
 }
 
+// 在系统文件 ibdata 的开始分配空间,回滚段系统页面,数据字典管理页面
 bool fsp_header_init(space_id_t space_id, page_no_t size, mtr_t *mtr,
                      bool is_boot) {
   auto space = fil_space_get(space_id);

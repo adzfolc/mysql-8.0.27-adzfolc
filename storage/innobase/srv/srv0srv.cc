@@ -434,6 +434,9 @@ ulong srv_idle_flush_pct = srv_idle_flush_pct_default;
 
 /* This parameter is deprecated. Use srv_n_io_[read|write]_threads
 instead. */
+// 上层对 buffer pool 发出读写请求,主线程会将这个操作交给异步 IO 线程处理.
+// 读写操作的区别在于,读操作需要在请求之后等待异步读的完成,然后才能继续后面的操作(只有读到完整的数据,才能继续后面的工作);写操作不需要等待通知, InnoDB 不会对单独页面的写操作做通知及等待(没有必要,写不完也可以继续后续操作).
+// 只有 checkpoint/批量刷盘 的时候,才会等待批量操作的完成.
 ulong srv_n_read_io_threads;
 ulong srv_n_write_io_threads;
 
@@ -1239,10 +1242,11 @@ void srv_boot(void) {
   /* Initialize synchronization primitives, memory management, and thread
   local storage */
 
+  // 初始化 同步控制系统,内存管理系统,日志恢复变量
   srv_general_init();
 
   /* Initialize this module */
-
+  // 初始化后台线程 (srv_sys -> sys_threads) 同步控制系统
   srv_init();
 }
 
