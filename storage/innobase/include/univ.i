@@ -291,6 +291,7 @@ management to ensure correct alignment for doubles etc. */
 #define UNIV_PAGE_SIZE_SHIFT srv_page_size_shift
 
 /** The universal page size of the database */
+// 页面大小
 #define UNIV_PAGE_SIZE ((ulint)srv_page_size)
 
 /** log2 of smallest compressed page size (1<<10 == 1024 bytes)

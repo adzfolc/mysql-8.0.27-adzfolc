@@ -47,26 +47,48 @@ Index page header starts at the first offset left free by the FIL-module */
 
 typedef byte page_header_t;
 
+// 页面头信息从偏移为 38 的位置开始
 #define PAGE_HEADER                                  \
   FSEG_PAGE_DATA /* index page header starts at this \
          offset */
 /*-----------------------------*/
+// 长度 2 偏移 0
+// 存储 Slot(槽) 的个数
 #define PAGE_N_DIR_SLOTS 0 /* number of slots in page directory */
+// 长度 2 偏移 2
+// 存储当前页面,还没使用的空间的最小位置
 #define PAGE_HEAP_TOP 2    /* pointer to record heap top */
+// 长度 2 偏移 4
+// 存储当前页面堆管理空间中存储的记录数目,包含 最大记录 最小记录 的管理
 #define PAGE_N_HEAP                                      \
   4                    /* number of records in the heap, \
                        bit 15=flag: new-style compact page format */
+// 长度 2 偏移 6
+// 存储当前页面中,已经被删除的记录所占用的空间组成二点链表首指针
 #define PAGE_FREE 6    /* pointer to start of page free record list */
+// 长度 2 偏移 8
+// 当前页面中已经被删除的记录数 -> 还未被真正 purge 的记录数
+// when purge one record -> PAGE_GARBAGE-- PAGE_FREE++
 #define PAGE_GARBAGE 8 /* number of bytes in deleted records */
+// 长度 2 偏移 10
+// 指向当前页面最后被插入的位置
 #define PAGE_LAST_INSERT                                                \
   10                      /* pointer to the last inserted record, or    \
                           NULL if this info has been reset by a delete, \
                           for example */
+// 长度 2 偏移 12
+// 表示上次插入的方向
 #define PAGE_DIRECTION 12 /* last insert direction: PAGE_LEFT, ... */
+// 长度 2 偏移 14
+// 表示以同一个方向连续插入记录的条数
 #define PAGE_N_DIRECTION                                            \
   14                   /* number of consecutive inserts to the same \
                        direction */
+// 长度 2 偏移 16
+// 存储当前页面中存储了多少条记录
 #define PAGE_N_RECS 16 /* number of user records on the page */
+// 长度 8 偏移 18
+// 存储当前页面所有事务中值最大的事务号 -> 只在 二级索引 和 插入缓冲 中定义
 #define PAGE_MAX_TRX_ID                             \
   18 /* highest id of a trx which may have modified \
      a record on the page; trx_id_t; defined only   \
@@ -76,15 +98,23 @@ typedef byte page_header_t;
   26 /* end of private data structure of the page \
      header which are set in a page create */
 /*----*/
+// 长度 2 偏移 26
+// 存储当前节点在 B+ Tree 第几层
+// 叶子节点 -> 0
 #define PAGE_LEVEL                                 \
   26 /* level of the node in an index tree; the    \
      leaf level is the level 0.  This field should \
      not be written to after page creation. */
+// 长度 8 偏移 28
+// 当前页面属于哪个索引,存储对应的索引 ID 值
 #define PAGE_INDEX_ID                          \
   28 /* index id where the page belongs.       \
      This field should not be written to after \
      page creation. */
 
+// 只有根页面的 PAGE_BTR_SEG_LEAF/PAGE_BTR_SEG_TOP 两个变量有意义,在其他页面忽略不计
+// 长度 10 偏移 36
+// 存储 B+ Tree 叶子段的段头地址
 #define PAGE_BTR_SEG_LEAF                         \
   36 /* file segment header for the leaf pages in \
      a B-tree: defined only on the root page of a \
@@ -96,6 +126,7 @@ there is a free list base node if the page is
 the root page of an ibuf tree, and at the same
 place is the free list node if the page is in
 a free list */
+// 存储 B+ Tree 内节点段的地址
 #define PAGE_BTR_SEG_TOP (36 + FSEG_HEADER_SIZE)
 /* file segment header for the non-leaf pages
 in a B-tree: defined only on the root page of

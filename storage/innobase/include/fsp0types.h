@@ -56,6 +56,8 @@ page size | file space extent size
   32 KiB  |  64 pages = 2 MiB
   64 KiB  |  64 pages = 4 MiB
 */
+// 一个簇中所有页面的页面数,默认 64
+// default 64 KiB/page 
 #define FSP_EXTENT_SIZE                                                 \
   static_cast<page_no_t>(                                               \
       ((UNIV_PAGE_SIZE <= (16384)                                       \

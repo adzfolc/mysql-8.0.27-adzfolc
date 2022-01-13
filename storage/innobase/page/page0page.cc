@@ -234,16 +234,22 @@ byte *page_mem_alloc_heap(
 
   ut_ad(page && heap_no);
 
+  // 先获取本页面共剩下的空间,如果本页面空间还有剩余,则从本页面申请
   avl_space = page_get_max_insert_size(page, 1);
 
   if (avl_space >= need) {
+    // 从 PAGE_HEAP_TOP 位置开始申请空间
     block = page_header_get_ptr(page, PAGE_HEAP_TOP);
 
+    // 将新的位置更新到 PAGE_HEAP_TOP
     page_header_set_ptr(page, page_zip, PAGE_HEAP_TOP, block + need);
+    // 将 heap_no 返回给上层
     *heap_no = page_dir_get_n_heap(page);
 
+    // 更新 PAGE_N_HEAP 的值
     page_dir_set_n_heap(page, page_zip, 1 + *heap_no);
 
+    // 返回申请出来的页面空间首地址,外面要使用的空间大小为 need .
     return (block);
   }
 

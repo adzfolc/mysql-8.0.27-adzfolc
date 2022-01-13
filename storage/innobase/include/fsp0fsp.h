@@ -130,12 +130,16 @@ first page of a space. The space for this header is reserved in every extent
 descriptor page, but used only in the first. */
 
 /*-------------------------------------*/
+// 当前表空间 ID 号,每个表空间分配唯一 ID
 #define FSP_SPACE_ID 0 /* space id */
 #define FSP_NOT_USED                      \
   4 /* this field contained a value up to \
     which we know that the modifications  \
     in the database have been flushed to  \
     the file space; not used now */
+// 当前表空间的总页数,一个表空间可以有多个文件
+// FSP_SIZE 表示表空间中所有文件按照页面(默认16KB)大小划分的页面数之和,
+// 在文件空间不足需要扩张时,这个值会被更新为扩展后的大小
 #define FSP_SIZE                    \
   8 /* Current size of the space in \
     pages */
@@ -153,23 +157,36 @@ descriptor page, but used only in the first. */
 #define FSP_SPACE_FLAGS               \
   16 /* fsp_space_t.flags, similar to \
      dict_table_t::flags */
+// 已经被使用过的页面数
 #define FSP_FRAG_N_USED                            \
   20                /* number of used pages in the \
                     FSP_FREE_FRAG list */
+// 表空间中空闲簇的链表
 #define FSP_FREE 24 /* list of free extents */
+// 表空间中被使用过(分配页)的簇称为半满簇
+// FSP_FREE_FRAG 保存所有半满簇的链表头指针
 #define FSP_FREE_FRAG (24 + FLST_BASE_NODE_SIZE)
 /* list of partially free extents not
 belonging to any segment */
+// 簇的空间被全部使用称为满簇
+// 用来存储所有满簇的链表头指针
 #define FSP_FULL_FRAG (24 + 2 * FLST_BASE_NODE_SIZE)
 /* list of full extents not belonging
 to any segment */
+// 表空间中,每个段都有唯一的ID,每次使用后自增
+// FSP_SEG_ID 表示下个段的ID号
 #define FSP_SEG_ID (24 + 3 * FLST_BASE_NODE_SIZE)
 /* 8 bytes which give the first unused
 segment id */
+// Inode 管理数据段,一个 Inode 代表一个数据段.
+// Inode 页面用于存储 Inode 节点,如果 Inode 页面存满,称为满 Inode 页面
+//                              否则,称为 半满 Inode 页面
+// FSP_SEG_INODES_FULL 存储所有的满 Inode 页面头指针
 #define FSP_SEG_INODES_FULL (32 + 3 * FLST_BASE_NODE_SIZE)
 /* list of pages containing segment
 headers, where all the segment inode
 slots are reserved */
+// 存储所有半满 Inode 页面的链表头指针,或者空闲的 Inode 页面
 #define FSP_SEG_INODES_FREE (32 + 4 * FLST_BASE_NODE_SIZE)
 /* list of pages containing segment
 headers, where not all the segment
@@ -207,17 +224,22 @@ segment inode pages */
 
 #define FSEG_ARR_OFFSET (FSEG_PAGE_DATA + FLST_NODE_SIZE)
 /*-------------------------------------*/
+// 标识段的 ID
 #define FSEG_ID                             \
   0 /* 8 bytes of segment id: if this is 0, \
     it means that the header is unused */
+// 半满簇已经使用的页面总数
 #define FSEG_NOT_FULL_N_USED 8
 /* number of used segment pages in
 the FSEG_NOT_FULL list */
+// 存储所有空闲簇的链表头指针
 #define FSEG_FREE 12
 /* list of free extents of this
 segment */
+// 半满簇的链表头指针
 #define FSEG_NOT_FULL (12 + FLST_BASE_NODE_SIZE)
 /* list of partially free extents */
+// 所有满簇的链表头指针
 #define FSEG_FULL (12 + 2 * FLST_BASE_NODE_SIZE)
 /* list of full extents */
 #define FSEG_MAGIC_N (12 + 3 * FLST_BASE_NODE_SIZE)
@@ -277,21 +299,30 @@ pages are allocated from the space */
 @{ */
 
 /*			EXTENT DESCRIPTOR
+        簇文件描述符
                         =================
 
 File extent descriptor data structure: contains bits to tell which pages in
 the extent are free and which contain old tuple version to clean. */
 
 /*-------------------------------------*/
+// 簇所属段的 ID 号,对应 Inode 结构体中 FSEG_ID
 #define XDES_ID                      \
   0 /* The identifier of the segment \
     to which this extent belongs */
+// 存储簇的链表指针,包括 向前指针 和 向后指针
+// 每一个指针(地址)都是一个页面地址,包括 page/boffset
+// page     ->  簇描述符在文件哪个页面
+// boffset  ->  簇描述符在 page 页面中的偏移地址(从当前位置开始是簇描述符)
 #define XDES_FLST_NODE              \
   8 /* The list node data structure \
     for the descriptors */
+// 当前簇的状态, XDES_FREE(空闲簇), XDES_FREE_FRAG(半满簇), XDES_FULL_FRAG(满簇), XDES_FSEG(属于下一个段)
 #define XDES_STATE (FLST_NODE_SIZE + 8)
 /* contains state information
 of the extent */
+// 位图
+// InnoDB 通过 XDES_BITMAP 管理簇内页面使用情况.每个页面用2个位标识
 #define XDES_BITMAP (FLST_NODE_SIZE + 12)
 /* Descriptor bitmap of the pages
 in the extent */

@@ -39,14 +39,23 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 /** MySQL-4.0.14 space id the page belongs to (== 0) but in later
 versions the 'new' checksum of the page */
+// 长度 4 偏移 4
+// MySQL < 4.0.14 存储 space id, 值 0
+// MySQL > 4.0.14 存储本页面 checksum ,校验页面是否完整
 #define FIL_PAGE_SPACE_OR_CHKSUM 0
 
+// 长度4 偏移 4
+// 页面在当前表空间的页面号, 16KB 为单位,在页面内的偏移位置
+// 页面号从 0 开始计数
 /** page offset inside space */
 #define FIL_PAGE_OFFSET 4
 
 /** if there is a 'natural' predecessor of the page, its offset.
 Otherwise FIL_NULL. This field is not set on BLOB pages, which are stored as a
 singly-linked list. See also FIL_PAGE_NEXT. */
+// 长度 4 偏移 4
+// 存储当前叶子的上个页面
+// 如果是最左页面,存储 FIL_NULL
 #define FIL_PAGE_PREV 8
 
 /** On page 0 of the tablespace, this is the server version ID */
@@ -57,12 +66,16 @@ FIL_NULL. B-tree index pages(FIL_PAGE_TYPE contains FIL_PAGE_INDEX) on the
 same PAGE_LEVEL are maintained as a doubly linked list via FIL_PAGE_PREV and
 FIL_PAGE_NEXT in the collation order of the smallest user record on each
 page. */
+// 长度 4 偏移 12
+// 存储当前页面的下个页面
+// 如果是最右页面,存储 FIL_NULL
 #define FIL_PAGE_NEXT 12
 
 /** On page 0 of the tablespace, this is the server version ID */
 #define FIL_PAGE_SPACE_VERSION 12
 
 /** lsn of the end of the newest modification log record to the page */
+// 存储当前页面最后一次修改时 LSN 值
 #define FIL_PAGE_LSN 16
 
 /** file page type: FIL_PAGE_INDEX,..., 2 bytes. The contents of this field
@@ -72,11 +85,16 @@ The opposite does not hold.
 
 In tablespaces created by MySQL/InnoDB 5.1.7 or later, the contents of this
 field is valid for all uncompressed pages. */
+// 长度 2 偏移 24
+// 存储页面类型
 #define FIL_PAGE_TYPE 24
 
 /** this is only defined for the first page of the system tablespace: the file
 has been flushed to disk at least up to this LSN. For FIL_PAGE_COMPRESSED
 pages, we store the compressed page control information in these 8 bytes. */
+// 长度 8 偏移 26
+// 当前 InnoDB 最大被 flush 到的 LSN 值
+// 只会在系统表空间 0号页面 被定义
 #define FIL_PAGE_FILE_FLUSH_LSN 26
 
 /** If page type is FIL_PAGE_COMPRESSED then the 8 bytes starting at
@@ -101,12 +119,15 @@ constexpr ulint FIL_PAGE_COMPRESS_SIZE_V1 = FIL_PAGE_ORIGINAL_SIZE_V1 + 2;
 constexpr ulint FIL_RTREE_SPLIT_SEQ_NUM = FIL_PAGE_FILE_FLUSH_LSN;
 
 /** starting from 4.1.x this contains the space id of the page */
+// 长度 4 偏移 3
+// MySQL > 4.1.x 当前页面属于哪个表空间
 constexpr ulint FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID = 34;
 
 /** alias for space id */
 #define FIL_PAGE_SPACE_ID FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID
 
 /** start of the data on the page */
+// 页面中数据开始的位置
 constexpr ulint FIL_PAGE_DATA = 38;
 
 /** File page trailer */

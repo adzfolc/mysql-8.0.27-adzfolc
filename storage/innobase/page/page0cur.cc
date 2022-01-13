@@ -414,7 +414,7 @@ void page_cur_search_with_match(const buf_block_t *block,
   /* Perform binary search. First the search is done through the page
   directory, after that as a linear search in the list of records
   owned by the upper limit directory slot. */
-
+  // 先定义二分查找的两个边界值
   low = 0;
   up = page_dir_get_n_slots(page) - 1;
 
@@ -476,18 +476,23 @@ void page_cur_search_with_match(const buf_block_t *block,
 
   /* Perform binary search until the lower and upper limit directory
   slots come to the distance 1 of each other */
-
+  // 继续查找到条件是 up -low > 1
   while (up - low > 1) {
+    // 每次新获取二分值
     mid = (low + up) / 2;
+    // 取出二分值这个位置的槽所对应的记录
     slot = page_dir_get_nth_slot(page, mid);
     mid_rec = page_dir_slot_get_rec(slot);
 
     cur_matched_fields = std::min(low_matched_fields, up_matched_fields);
 
+    // 拿槽对应位置的记录于要查找的记录做对比
     auto offsets = get_mid_rec_offsets();
 
     cmp = tuple->compare(mid_rec, index, offsets, &cur_matched_fields);
-
+    
+    // 如果要查找的值比中间值大,则下次查找的 low 变为这次的二分值 mid
+    // 如果要查找的值比中间值小,则下次查找的 up  变为这次的二分值 mid
     if (cmp > 0) {
     low_slot_match:
       low = mid;
@@ -516,6 +521,7 @@ void page_cur_search_with_match(const buf_block_t *block,
     }
   }
 
+  // 取出 low 号槽 与 up 号槽,并且找到对应的记录值
   slot = page_dir_get_nth_slot(page, low);
   low_rec = page_dir_slot_get_rec(slot);
   slot = page_dir_get_nth_slot(page, up);
@@ -524,6 +530,7 @@ void page_cur_search_with_match(const buf_block_t *block,
   /* Perform linear search until the upper and lower records come to
   distance 1 of each other. */
 
+  // 在两个记录边界做循环查找记录的工作
   while (page_rec_get_next_const(low_rec) != up_rec) {
     mid_rec = page_rec_get_next_const(low_rec);
 
@@ -533,6 +540,8 @@ void page_cur_search_with_match(const buf_block_t *block,
 
     cmp = tuple->compare(mid_rec, index, offsets, &cur_matched_fields);
 
+    // 如果要查找的记录比 low 大,则继续向后查找
+    // 如果要查找的记录比 low 小,则将上边界缩小,以减少循环次数
     if (cmp > 0) {
     low_rec_match:
       low_rec = mid_rec;
@@ -575,6 +584,7 @@ void page_cur_search_with_match(const buf_block_t *block,
       goto up_rec_match;
     }
   }
+  // 循环结束,不管是否找到记录,都有结论
 
   if (mode <= PAGE_CUR_GE) {
     page_cur_position(up_rec, block, cursor);
