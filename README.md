@@ -59,6 +59,8 @@
     [04_table](./notes_by_adzfolc/03_Storage/01_InnoDB/04_table.md)  
     [05_index_and_algo](./notes_by_adzfolc/03_Storage/01_InnoDB/05_index_and_algo.md)  
     [06_lock_latch_and_trx](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_latch_and_trx.md)  
+    [07_data_dict](./notes_by_adzfolc/03_Storage/01_InnoDB/07_data_dict.md)  
+    [08_innodb_storage_structure](./notes_by_adzfolc/03_Storage/01_InnoDB/08_innodb_storage_structure.md)  
 
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)  
@@ -81,7 +83,7 @@
     3. P230
 2. MySQL技术内幕-InnoDB存储引擎 P330
 3. MySQL 8.0 Reference Manual P3033
-4. MySQL 运维内参 P109 表的打开与加载
+4. MySQL 运维内参 P160 InnoDB 记录格式
 
 ## Recommend Materials
 |Book|Comment|
