@@ -728,6 +728,13 @@ static inline bool rec_convert_dtuple_to_rec_comp(
   } else {
     ut_ad(v_entry == nullptr);
     ut_ad(num_v == 0);
+    /**
+     * @brief 下面的计算用来找到记录头中,用于存储 nulls 标志位的位置.
+     *    这里是在 rec 的位置上向低位位移 6 bytes 开始写入,
+     *    且写入顺序都是 高位->低位 (都是 nulls--),
+     *    所以可以知道 nulls 的存储与列的顺序相反,
+     *    即 nulls 标志位的信息,与列数据存储之间,相差 REC_N_NEW_EXTRA_BYTES (5bytes)
+     */
     nulls = rec - (REC_N_NEW_EXTRA_BYTES + 1);
 
     switch (UNIV_EXPECT(status, REC_STATUS_ORDINARY)) {
@@ -763,13 +770,22 @@ static inline bool rec_convert_dtuple_to_rec_comp(
   end = rec;
 
   if (n_fields != 0) {
+    // 通过 nulls 标志信息的位置,计算出存储变长长度信息的位置.
+    // 在一个索引中, nullable 列个数是固定的.
     lens = nulls - UT_BITS_IN_BYTES(n_null);
     /* clear the SQL-null flags */
+    // len + 1      -> nulls 标志存储的开始位置
+    // nulls - lens -> nulls 存储的长度
     memset(lens + 1, 0, nulls - lens);
   }
-
+  /**
+   * @brief 从函数 rec_convert_dtuple_to_rec_new 中可以看到,此处的 rec 是
+   *    用来存储第一列数据的位置,这个位置是从记录的首地址位置向高位移动了 extra_size 的位置.
+   *    所以此时需要通过 rec 位置向低位移动,来找到 nulls 及 lens 的存储位置.
+   *    预先计算好,在 extra_size 所管理的范围内
+   */
   /* Store the data and the offsets */
-
+  // 将每一列的数据, null, len 的信息存储到相应的位置
   for (i = 0; i < n_fields; i++) {
     const dict_field_t *ifield;
     dict_col_t *col = nullptr;
@@ -779,6 +795,8 @@ static inline bool rec_convert_dtuple_to_rec_comp(
     type = dfield_get_type(field);
     len = dfield_get_len(field);
 
+    // 如果是一个索引指针,则直接使用4个字节存储.
+    // 即 REC_NODE_PTR_SIZE 所表示的长度,算是固定长度
     if (UNIV_UNLIKELY(i == n_node_ptr_field)) {
       ut_ad(dtype_get_prtype(type) & DATA_NOT_NULL);
       ut_ad(len == REC_NODE_PTR_SIZE);
@@ -787,6 +805,7 @@ static inline bool rec_convert_dtuple_to_rec_comp(
       break;
     }
 
+    // 计算 NULL 信息,因为这个标志是通过位来存储的,所以对每个字节都需要做位处理
     if (!(dtype_get_prtype(type) & DATA_NOT_NULL)) {
       /* nullable field */
       ut_ad(n_null--);
@@ -817,6 +836,11 @@ static inline bool rec_convert_dtuple_to_rec_comp(
       fixed_len = 0;
     }
 
+    /**
+     * @brief 实现列的大小和存储其长度字节数动态匹配的位置,
+     *    如果变长字符的长度 <= 127 bytes, 实际长度通过 1 byte 可以存储.
+     *    如果变长字符的长度 >= 128 bytes, 实际长度通过 2 bytes 存储.
+     */
     /* If the maximum length of a variable-length field
     is up to 255 bytes, the actual length is always stored
     in one byte. If the maximum length is more than 255
@@ -824,6 +848,8 @@ static inline bool rec_convert_dtuple_to_rec_comp(
     0..127.  The length will be encoded in two bytes when
     it is 128 or more, or when the field is stored externally. */
     if (fixed_len) {
+      // debug 模式下,如果是固定长度,会存储长度
+      // 非 debug 模式,不会存储类型长度
 #ifdef UNIV_DEBUG
       ulint mbminlen = DATA_MBMINLEN(col->mbminmaxlen);
       ulint mbmaxlen = DATA_MBMAXLEN(col->mbminmaxlen);
@@ -833,6 +859,7 @@ static inline bool rec_convert_dtuple_to_rec_comp(
       ut_ad(!dfield_is_ext(field));
 #endif /* UNIV_DEBUG */
     } else if (dfield_is_ext(field)) {
+      // 如果是行外存储数据,需要两个字节存储其长度
       ut_ad(DATA_BIG_COL(col));
       ut_ad(len <= REC_ANTELOPE_MAX_INDEX_COL_LEN + BTR_EXTERN_FIELD_REF_SIZE);
       *lens-- = (byte)(len >> 8) | 0xc0;
@@ -845,15 +872,19 @@ static inline bool rec_convert_dtuple_to_rec_comp(
             DATA_LARGE_MTYPE(dtype_get_mtype(type)) ||
             !strcmp(index->name, FTS_INDEX_TABLE_IND_NAME));
 #endif /* !UNIV_HOTBACKUP */
+      // 如果变长列长度 < 128 ,用 1 byte 存储长度
+      // 如果边长列长度 < 256 ,且类型不是 BLOB/VAR/GEOMETRY ,用 1 byte 存储长度
       if (len < 128 ||
           !DATA_BIG_LEN_MTYPE(dtype_get_len(type), dtype_get_mtype(type))) {
         *lens-- = (byte)len;
       } else {
+        // 其他情况下,用 2 bytes 存储长度
         ut_ad(len < 16384);
         *lens-- = (byte)(len >> 8) | 0x80;
         *lens-- = (byte)len;
       }
     }
+    // 将元组列信息,写入到 Compact 记录对应的列中去, len 为其对应的存储长度
     if (len > 0) memcpy(end, dfield_get_data(field), len);
     end += len;
   }
@@ -916,6 +947,7 @@ static inline bool rec_convert_dtuple_to_rec_comp(
 /** Builds a new-style physical record out of a data tuple and
  stores it beginning from the start of the given buffer.
  @return pointer to the origin of physical record */
+// 元组到物理存储转换
 static rec_t *rec_convert_dtuple_to_rec_new(
     byte *buf,                 /*!< in: start address of
                                the physical record */
@@ -928,10 +960,14 @@ static rec_t *rec_convert_dtuple_to_rec_new(
   bool instant;
 
   status = dtuple_get_info_bits(dtuple) & REC_NEW_STATUS_MASK;
+  // 计算记录头大小,通过 extra_size 表示
   rec_get_converted_size_comp(index, status, dtuple->fields, dtuple->n_fields,
                               &extra_size);
+  // buf              存储物理记录的开始位置
+  // buf + extra_size 存储第一列的位置,即 rec 的位置
   rec = buf + extra_size;
 
+  // 将 元组 dtuple 转换为 页面上的 Compact 格式记录
   instant = rec_convert_dtuple_to_rec_comp(
       rec, index, dtuple->fields, dtuple->n_fields, nullptr, status, false);
 
