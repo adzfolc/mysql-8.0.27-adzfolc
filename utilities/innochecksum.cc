@@ -677,9 +677,10 @@ static bool is_page_empty(const byte *page, size_t len) {
   return (true);
 }
 
+// 重写页面的 checksum (页面末尾位置)
 /** Rewrite the checksum for the page.
 @param[in,out]	page			page buffer
-@param[in]	page_size		page size in bytes on disk.
+@param[in]	page_size		page size in bytes on disk. 磁盘中页面的大小
 @retval		true			do rewrite
 @retval		false			skip the rewrite as checksum stored
 match with calculated or page is doublwrite buffer. */
