@@ -163,6 +163,7 @@
         1. 事务提交时
         2. 当 redolog buffer 中有一半的内存空间被使用
         3. log checkpoint
+        4. master thraed
     4. log block 采用追加写入(append)在 redo log file 的最后部分,当一个 redo log file 被写满时,会接着写入写一个 redo log file ,使用方式为 round-bin.
 
 6. redolog 格式

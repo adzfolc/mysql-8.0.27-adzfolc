@@ -8803,7 +8803,7 @@ void innobase_get_multi_value(const TABLE *mysql_table, ulint f_idx,
 /** Stores a row in an InnoDB database, to the table specified in this
  handle.
  @return error code */
-
+// InnoDB 执行插入的函数
 int ha_innobase::write_row(uchar *record) /*!< in: a row in MySQL format */
 {
   dberr_t error;
@@ -8819,8 +8819,10 @@ int ha_innobase::write_row(uchar *record) /*!< in: a row in MySQL format */
     return intrinsic_table_write_row(record);
   }
 
+  // 根据用户线程信息,获取对应 Innodb session 中事务信息
   trx_t *trx = thd_to_trx(m_user_thd);
 
+  // 将 trx_t(server layer) 事务信息封装为 TrxInInnoDB(InnoDB layer)
   TrxInInnoDB trx_in_innodb(trx);
 
   if (!m_prebuilt->table->is_intrinsic() && trx_in_innodb.is_aborted()) {

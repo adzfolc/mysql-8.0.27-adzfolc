@@ -15,3 +15,5 @@
     * @see [int handler::ha_write_row(uchar *buf)](../../../sql/handler.cc)
     * @see [int ha_innobase::write_row(uchar *record)](../../../storage/innobase/handler/ha_innodb.cc)
     * 从 Server 层的 ha_write_row 接口调用 InnoDB 层的 write_row 接口, InnoDB 会将收到的 Record 记录转换为 **元组 Tuple**(索引元组格式),这是与 Record 对应的 InnoDB 的表示方式,是内存的,逻辑的记录.在系统真正将其写入页面前,记录一直以 索引元组格式 存在.
+* InnoDB 行数据 Extra Bytes 默认占用 5 bytes
+    * ![innodb_extra_size](./innodb_extra_size.png)

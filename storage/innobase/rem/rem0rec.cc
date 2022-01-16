@@ -680,7 +680,7 @@ static rec_t *rec_convert_dtuple_to_rec_old(
 }
 
 /** Builds a ROW_FORMAT=COMPACT record out of a data tuple.
-@param[in]	rec		origin of record
+@param[in]	rec		origin of record 存储了第一列数据的位置,在 rec 前存储 extra_size 包含的数据
 @param[in]	index		record descriptor
 @param[in]	fields		array of data fields
 @param[in]	n_fields	number of data fields
@@ -771,7 +771,8 @@ static inline bool rec_convert_dtuple_to_rec_comp(
 
   if (n_fields != 0) {
     // 通过 nulls 标志信息的位置,计算出存储变长长度信息的位置.
-    // 在一个索引中, nullable 列个数是固定的.
+    // 在一个索引中, nullable 列个数是固定的,所以可以直接计算
+    // 此时,从 nulls 标志位开始向低位位移固定字节数,可找到长度存储的位置,变长列长度的存储顺序与列存储的顺序相反
     lens = nulls - UT_BITS_IN_BYTES(n_null);
     /* clear the SQL-null flags */
     // len + 1      -> nulls 标志存储的开始位置
@@ -806,10 +807,13 @@ static inline bool rec_convert_dtuple_to_rec_comp(
     }
 
     // 计算 NULL 信息,因为这个标志是通过位来存储的,所以对每个字节都需要做位处理
+    // 判断这一列在建表时指定的 null 属性,若为 true ,说明是 nullable 的
     if (!(dtype_get_prtype(type) & DATA_NOT_NULL)) {
       /* nullable field */
       ut_ad(n_null--);
 
+      // 当 null_mask 为0时, nulls 向前退1字节,将 null_mask 恢复为1的初值
+      // null_mask 占用 1byte,当 null_mask 为 0,说明此时已经占用了8位的 null ,此时 extra_size 可以使用下一个字节存储 nulls 标志
       if (UNIV_UNLIKELY(!(byte)null_mask)) {
         nulls--;
         null_mask = 1;
@@ -818,7 +822,9 @@ static inline bool rec_convert_dtuple_to_rec_comp(
       ut_ad(*nulls < null_mask);
 
       /* set the null flag if necessary */
+      // 如果当前列是 null 值,需要将 NULL 值信息反映到 nulls 数组中去
       if (dfield_is_null(field)) {
+        // 通过 null_mask 标识当前哪一列的值是 null
         *nulls |= null_mask;
         null_mask <<= 1;
         continue;
