@@ -338,17 +338,23 @@ are persisted to table */
 /** Doublewrite buffer */
 /** @{ */
 /** The offset of the doublewrite buffer header on the trx system header page */
+// MySQL 在系统页面, ibdata 文件的第五个页面(同时用来存储事务信息的一个页面)中存储 double write 信息
+// 偏移位置是页面结束位置的最后 200 bytes
 #define TRX_SYS_DOUBLEWRITE (UNIV_PAGE_SIZE - 200)
 /*-------------------------------------------------------------*/
+// 存储 double write buffer segment header 地址
 #define TRX_SYS_DOUBLEWRITE_FSEG \
   0 /*!< fseg header of the fseg \
     containing the doublewrite   \
     buffer */
+// 4 byte 魔数用来判断是否已经初始化过 double write buffer
 #define TRX_SYS_DOUBLEWRITE_MAGIC FSEG_HEADER_SIZE
 /*!< 4-byte magic number which
 shows if we already have
 created the doublewrite
 buffer */
+// double write buffer 有2个 extent(簇),每个簇含64个页面
+// double write buffer 中第一个簇的首个页面的页信息
 #define TRX_SYS_DOUBLEWRITE_BLOCK1 (4 + FSEG_HEADER_SIZE)
 /*!< page number of the
 first page in the first
@@ -356,12 +362,17 @@ sequence of 64
 (= FSP_EXTENT_SIZE) consecutive
 pages in the doublewrite
 buffer */
+// 第二个簇的首个页面地址
 #define TRX_SYS_DOUBLEWRITE_BLOCK2 (8 + FSEG_HEADER_SIZE)
 /*!< page number of the
 first page in the second
 sequence of 64 consecutive
 pages in the doublewrite
 buffer */
+/*
+  重复存储 TRX_SYS_DOUBLEWRITE_MAGIC, TRX_SYS_DOUBLEWRITE_BLOCK1, TRX_SYS_DOUBLEWRITE_BLOCK2
+  防止自己的页面不完整
+*/
 #define TRX_SYS_DOUBLEWRITE_REPEAT \
   12 /*!< we repeat                \
      TRX_SYS_DOUBLEWRITE_MAGIC,    \

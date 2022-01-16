@@ -163,7 +163,9 @@
         1. 事务提交时
         2. 当 redolog buffer 中有一半的内存空间被使用
         3. log checkpoint
-        4. master thraed
+        4. master thread
+        5. LRU方式 -> Buffer pool 空间不足时,将不使用的老页面淘汰,系统找到老的页面进行刷盘
+        6. List方式 -> 日志空间不足/后台 master thread 定时任务 刷盘时,去需要区分页面的新旧状态,只需选择 LSN 最小的页面,从前到后刷文件
     4. log block 采用追加写入(append)在 redo log file 的最后部分,当一个 redo log file 被写满时,会接着写入写一个 redo log file ,使用方式为 round-bin.
 
 6. redolog 格式
