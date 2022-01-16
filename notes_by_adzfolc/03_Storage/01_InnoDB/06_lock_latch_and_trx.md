@@ -160,12 +160,14 @@
     1. log group 重做日志组,包含多个重做日志文件. InnoDB 存储引擎只支持一个 log group(源码限制), log group 是逻辑概念,没有实际存储的物理文件表示 log group 信息. log group 由多个重做日志文件组成,每个 log group 中的日志文件大小是相同的.
     2. 重做日志文件存储的是 redolog buffer 中保存的 redolog block(512bytes) ,也是根据块的方式进行物理存储管理.
     3. redolog buffer 刷盘规则
-        1. 事务提交时
-        2. 当 redolog buffer 中有一半的内存空间被使用
-        3. log checkpoint
-        4. master thread
-        5. LRU方式 -> Buffer pool 空间不足时,将不使用的老页面淘汰,系统找到老的页面进行刷盘
-        6. List方式 -> 日志空间不足/后台 master thread 定时任务 刷盘时,去需要区分页面的新旧状态,只需选择 LSN 最小的页面,从前到后刷文件
+        1. Sharp Checkpoint
+            1. 数据库关闭时,所有脏页刷回磁盘,默认方式(innodb_fast_shutdown=1)
+        3. Fuzzy Checkpoint
+            1. master thread checkpoint -> 异步从 buffer pool 中脏页列表中刷新一定比例回磁盘,异步,不会阻塞用户查询线程
+            2. Flush LRU checkpoint -> Buffer pool 空间不足时,将不使用的老页面淘汰,系统找到老的页面进行刷盘
+            3. Async/Sync Flush Checkpoint -> async_water_mark = 75% * total_redo_log_file_size, sync_water_mark = 90% * total_redo_log_file_size.
+            事务提交时
+            4. Dirty Page too much -> buffer pool 中脏页太多, innodb_max_dirty_pages_pct 75%
     4. log block 采用追加写入(append)在 redo log file 的最后部分,当一个 redo log file 被写满时,会接着写入写一个 redo log file ,使用方式为 round-bin.
 
 6. redolog 格式
