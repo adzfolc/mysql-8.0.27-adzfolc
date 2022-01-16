@@ -61,6 +61,8 @@
     [06_lock_latch_and_trx](./notes_by_adzfolc/03_Storage/01_InnoDB/06_lock_latch_and_trx.md)  
     [07_data_dict](./notes_by_adzfolc/03_Storage/01_InnoDB/07_data_dict.md)  
     [08_innodb_storage_structure](./notes_by_adzfolc/03_Storage/01_InnoDB/08_innodb_storage_structure.md)  
+    [09_innodb_record_format](./notes_by_adzfolc/03_Storage/01_InnoDB/09_innodb_record_format.md)  
+    [10_innodb_double_write](./notes_by_adzfolc/03_Storage/01_InnoDB/10_innodb_double_write.md)
 
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)  
