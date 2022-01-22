@@ -960,6 +960,7 @@ void buf_pool_update_madvise() {
 /** Allocates a chunk of buffer frames. If called for an existing buf_pool, its
  free_list_mutex must be locked.
  @return chunk, or NULL on failure */
+// 初始化 buffer pool 实例内存空间
 static buf_chunk_t *buf_chunk_init(
     buf_pool_t *buf_pool, /*!< in: buffer pool instance */
     buf_chunk_t *chunk,   /*!< out: chunk of buffers */

@@ -1116,6 +1116,7 @@ class copyable_atomic_t : public std::atomic<T> {
 };
 
 using buf_fix_count_atomic_t = copyable_atomic_t<uint32_t>;
+// 物理页面在内存中的管理结构
 class buf_page_t {
  public:
   /** Copy constructor.
@@ -2153,6 +2154,7 @@ struct buf_pool_t {
   BufListMutex LRU_list_mutex;
 
   /** free and withdraw list mutex */
+  // 用来存储 buffer pool 实例中所有空闲的页面
   BufListMutex free_list_mutex;
 
   /** buddy allocator mutex */
