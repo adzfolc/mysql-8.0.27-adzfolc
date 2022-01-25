@@ -6516,10 +6516,14 @@ static int init_server_components() {
              "default_tmp_storage_engine", default_tmp_storage_engine);
   }
 
+  // 支持 2pc engine > 1 or 支持 2pc engine == 1 且 开启 binlog
   if (total_ha_2pc > 1 || (1 == total_ha_2pc && opt_bin_log)) {
+    // 开启 binlog
     if (opt_bin_log)
+      // tc_log 采用 mysql_bin_log 事务日志
       tc_log = &mysql_bin_log;
     else
+      // tc_log 采用 tc_log_mmap 事务日志,空的实现,实际不记日志
       tc_log = &tc_log_mmap;
   }
 
