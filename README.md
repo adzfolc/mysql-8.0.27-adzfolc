@@ -64,7 +64,7 @@
     [09_innodb_record_format](./notes_by_adzfolc/03_Storage/01_InnoDB/09_innodb_record_format.md)  
     [10_innodb_double_write](./notes_by_adzfolc/03_Storage/01_InnoDB/10_innodb_double_write.md)  
     [11_innodb_log_mechanism](./notes_by_adzfolc/03_Storage/01_InnoDB/11_innodb_log_mechanism.md)  
-    [12_undo_mvcc](./notes_by_adzfolc/03_Storage/01_InnoDB/12_undo_mvcc.md)
+    [12_redo_undo_mvcc](./notes_by_adzfolc/03_Storage/01_InnoDB/12_redo_undo_mvcc.md)
 
 * 99_QA  
 [99_QA](./notes_by_adzfolc/99_QA.md)  
