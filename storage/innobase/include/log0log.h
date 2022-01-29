@@ -108,6 +108,7 @@ constexpr uint32_t LOG_BLOCK_MAX_NO = 0x3FFFFFFFUL + 1;
 /** Number of bytes written to this block (also header bytes). */
 /**
  * LOG_BLOCK_HDR_DATA_LEN 占用 2bytes,表示 log block 大小.
+ * 初始值12(log block body 从第 12 bytes 处开始),随着向 block 写入的 redo 日志增加,该值也增长.
  * 当 log block 被写满时,表示使用全部 log block 空间,即占用 512bytes
  */
 constexpr uint32_t LOG_BLOCK_HDR_DATA_LEN = 4;
@@ -124,7 +125,7 @@ but if it will, it will start at this offset.
 An archive recovery can start parsing the log records starting from this
 offset in this log block, if value is not 0. */
 /**
- * log block 中第一个日志的偏移量
+ * log block 中第一个 MTR 生成的第一条 redolog 日志记录的偏移量
  * iff LOG_BLOCK_FIRST_REC_GROUP==LOG_BLOCK_HDR_DATA_LEN, 当前 block 不包含新日志
  */
 constexpr uint32_t LOG_BLOCK_FIRST_REC_GROUP = 6;
@@ -144,6 +145,7 @@ constexpr uint32_t LOG_BLOCK_HDR_SIZE = 12;
 
 /** 4 byte checksum of the log block contents. In InnoDB versions < 3.23.52
 this did not contain the checksum, but the same value as .._HDR_NO. */
+// 表示该 block 的校验值,用于正确性校验
 constexpr uint32_t LOG_BLOCK_CHECKSUM = 4;
 
 /** Size of the log block footer (trailer) in bytes. */
@@ -183,6 +185,7 @@ constexpr lsn_t LSN_MAX = (1ULL << 63) - 1;
 /** Checkpoint number. It's incremented by one for each consecutive checkpoint.
 During recovery, all headers are scanned, and one with the maximum checkpoint
 number is used for the recovery (checkpoint_lsn from the header is used). */
+// 服务器执行 checkpoint 的编号,每次执行 checkpoint ,该值就+1
 constexpr uint32_t LOG_CHECKPOINT_NO = 0;
 
 /** Checkpoint lsn. Recovery starts from this lsn and searches for the first
@@ -191,10 +194,12 @@ at which the first log record group started. Because of the relaxed order in
 flush lists, checkpoint lsn values are not precise anymore (the maximum delay
 related to the relaxed order in flush lists, is subtracted from oldest_lsn,
 when writing a checkpoint). */
+// 服务器在结束 checkpoint 时对应的 lsn 值,系统在崩溃恢复后恢复时将从该值开始
 constexpr uint32_t LOG_CHECKPOINT_LSN = 8;
 
 /** Offset within the log files, which corresponds to checkpoint lsn.
 Used for calibration of lsn and offset calculations. */
+// 上个属性中的 lsn 值在 redolog 文件中的偏移量
 constexpr uint32_t LOG_CHECKPOINT_OFFSET = 16;
 
 /** Size of the log buffer, when the checkpoint write was started.
@@ -204,6 +209,8 @@ It seems to be write-only field in InnoDB. Not used by recovery.
 Note that when the log buffer is being resized, all the log background threads
 are stopped, so there no is concurrent checkpoint write (the log_checkpointer
 thread is stopped). */
+// 服务器在执行 checkpoint 操作时对应的 log buffer 大小
+// 当 log buffer 调整大小时,所有后台线程都会停止,不会有并发的 checkpoint 写入
 constexpr uint32_t LOG_CHECKPOINT_LOG_BUF_SIZE = 24;
 
 /** Offsets used in a log file header */
@@ -211,17 +218,24 @@ constexpr uint32_t LOG_CHECKPOINT_LOG_BUF_SIZE = 24;
 /** Log file header format identifier (32-bit unsigned big-endian integer).
 This used to be called LOG_GROUP_ID and always written as 0,
 because InnoDB never supported more than one copy of the redo log. */
+// redo 日志版本,永远为0.
+// 因为 InnoDB 不支持 redolog 存在超过一份复制
 constexpr uint32_t LOG_HEADER_FORMAT = 0;
 
 /** 4 unused (zero-initialized) bytes. */
+// 用于字节填充,没有意义
 constexpr uint32_t LOG_HEADER_PAD1 = 4;
 
 /** LSN of the start of data in this log file (with format version 1 and 2). */
+// 标记当前 redolog 文件偏移量 2048 bytes 处对应的 lsn 值
 constexpr uint32_t LOG_HEADER_START_LSN = 8;
 
 /** A null-terminated string which will contain either the string 'MEB'
 and the MySQL version if the log file was created by mysqlbackup,
 or 'MySQL' and the MySQL version that created the redo log file. */
+// 字符串,标记当前 redolog 创建者是谁.
+// mysqlbackup  -> MEB + MySQL version
+// redolog file -> MySQL + MySQL Version
 constexpr uint32_t LOG_HEADER_CREATOR = 16;
 
 /** End of the log file creator field. */
