@@ -92,6 +92,7 @@
 ## Recommend Materials
 |Book|Comment|
 |-|-|
+|MySQL45讲|八股文合辑|
 |MySQL 8.0 Reference Manual|MySQL使用手册|
 |[MySQL Internals Manual](https://dev.mysql.com/doc/internals/en/)|MySQL内核详设|
 |PerconaServer-for-MySQL-8.0.23-14|Percona详设,含 Myrocks/Toukudb|
