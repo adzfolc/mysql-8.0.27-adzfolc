@@ -71,6 +71,9 @@
             * buf_next_to_write     ->  标记当前 log buffer 中已经有那些日志被刷新到磁盘中
             * flushed_to_disk_lsn   ->  刷新到磁盘中的 redolog 量的全局变量(系统刚启动时,固定值 8704 )
             * ![redolog_buffer_buffer_next_to_write_buf_free](./redolog_buffer_buffer_next_to_write_buf_free.png)
+        
+        7. checkpoint
+            1. 全局变量 checkpoint_lsn ,表示当前系统中可被覆盖的 redolog 总量,初值 8704.
 2. undo
     1. 事务ID(trxid)  
     分配的时机:  
